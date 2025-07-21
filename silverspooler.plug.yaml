@@ -1,6 +1,6 @@
-name: hello
+name: silverspooler
 functions:
   helloWorld:
-    path: hello.ts:helloWorld
+    path: silverspooler.ts:helloWorld
     command:
       name: "Say hello"
