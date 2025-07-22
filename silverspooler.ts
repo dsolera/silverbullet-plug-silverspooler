@@ -15,12 +15,24 @@ export async function renderSpools(excludeRetired: boolean | true): Promise<stri
       <td>Material</td>
       <td>Color</td>
       <td style='text-align: right;'>Left</td>
-      <td style='text-align: right;'>Original</td>
+      <td style='text-align: right;'>Initial</td>
       <td style='text-align: right;'>Gross</td>
       <td style='text-align: center;'></td>
     </tr>
   </thead>
   <tbody>`;
+
+  html += `<tr class='newspool'>
+    <td><input type='text' required id='spoolbrand' placeholder='New Brand' style='width: 100%;' /></td>
+    <td><input type='text' required id='spoolmaterial' placeholder='New Material' style='width: 100%;' /></td>
+    <td><input type='color' required id='spoolcolor' /><input type='checkbox' id='spooltranslucent' /> <label for='spooltranslucent' title='Translucent or transparent filament'>TL</label></td>
+    <td></td>
+    <td style='text-align: right;'><input type='number' required id='spoolnetweight' style='width: 60%;' /></td>
+    <td style='text-align: right;'><input type='number' required id='spoolgrossweight' style='width: 60%;' /></td>
+    <td>
+      <button class="sb-button-primary" data-item="newspool" onclick='javascript:document.getElementById("newspooldata").value ="br="+encodeURIComponent(document.getElementById("spoolbrand").value)+"&mt="+encodeURIComponent(document.getElementById("spoolmaterial").value)+"&cl="+encodeURIComponent(document.getElementById("spoolcolor").value)+"&tl="+encodeURIComponent(document.getElementById("spooltranslucent").checked)+"&nw="+encodeURIComponent(document.getElementById("spoolnetweight").value)+"&gw="+encodeURIComponent(document.getElementById("spoolgrossweight").value);'>Add New</button>
+      <input type='hidden' id='newspooldata' value='test-data' />
+    </td></tr>`;
 
   spools.forEach((s) => {
     if (!excludeRetired || (excludeRetired && !s.isRetired)) {
@@ -47,24 +59,6 @@ export async function renderSpools(excludeRetired: boolean | true): Promise<stri
   html += `</tbody>
   </table>
   </div>`;
-
-  return html;
-}
-
-export async function renderNewSpool(): Promise<string> {
-  let html = `
-  <button class='sb-button-primary' onclick='javascript:document.getElementById("new-spool").style["display"] = ""; this.style["display"] = "none";'>Add New Spool</button>
-  <div id='new-spool' style='display: none;'>
-  <input type='text' required id='spoolbrand' placeholder='Filament Brand' />
-  <input type='text' required id='spoolmaterial' placeholder='Filament Material' />
-  <label for='spoolcolor'>Color</label> <input type='color' required id='spoolcolor' name='spoolcolor' />
-  <input type='checkbox' id='spooltranslucent' name='spooltranslucent' /> <label for='spooltranslucent'>Translucent</label><br>
-  <label for='spoolnetweight'>Net Weight</label> <input type='number' required id='spoolnetweight' name='spoolnetweight' />
-  <label for='spoolgrossweight'>Gross Weight</label> <input type='number' required id='spoolgrossweight' name='spoolgrossweight' /><br>
-  <button class="sb-button-primary" data-item="newspool" onclick='javascript:document.getElementById("newspooldata").value ="br="+encodeURIComponent(document.getElementById("spoolbrand").value)+"&mt="+encodeURIComponent(document.getElementById("spoolmaterial").value)+"&cl="+encodeURIComponent(document.getElementById("spoolcolor").value)+"&tl="+encodeURIComponent(document.getElementById("spooltranslucent").checked)+"&nw="+encodeURIComponent(document.getElementById("spoolnetweight").value)+"&gw="+encodeURIComponent(document.getElementById("spoolgrossweight").value);'>Save</button>
-  <input type='hidden' id='newspooldata' value='test-data' />
-  </div>
-  `;
 
   return html;
 }
@@ -201,6 +195,11 @@ export async function click(dataItem: string, args: string) {
     }
     if (spoolGrossWeight <= spoolNetWeight) {
       editor.flashNotification("Please specify a spool Gross Weight larger than Net Weight.");
+      return;
+    }
+
+    let confirmed = await editor.confirm("Are you sure you want to add that new spool?");
+    if (!confirmed) {
       return;
     }
 
