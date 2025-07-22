@@ -27,7 +27,7 @@ export async function renderSpools(excludeRetired: boolean | true): Promise<stri
       html += `<tr class='${s.isRetired ? "retired" : "active"}'>
       <td>${s.brand}</td>
       <td>${s.material}</td>
-      <td>${s.colorName}${s.isTranslucent ? "/TL" : ""}</td>`;
+      <td>${renderColor(s.color, s.isTranslucent)}</td>`;
 
       if (s.isRetired) {
         html += "<td style='text-align: right;' class='remaining'>&mdash;</td><td style='text-align: right;'>&mdash;</td><td style='text-align: right;'>&mdash;</td><td></td>"
@@ -57,10 +57,10 @@ export async function renderNewSpool(): Promise<string> {
   <div id='new-spool' style='display: none;'>
   <input type='text' required id='spoolbrand' placeholder='Filament Brand' />
   <input type='text' required id='spoolmaterial' placeholder='Filament Material' />
-  <input type='text' required id='spoolcolor' placeholder='Filament Color' />
-  <input type='checkbox' id='spooltranslucent' /> <label>Translucent</label><br>
-  <label>Net Weight</label> <input type='number' required id='spoolnetweight' />
-  <label>Gross Weight</label> <input type='number' required id='spoolgrossweight' /><br>
+  <label for='spoolcolor'>Color</label> <input type='color' required id='spoolcolor' name='spoolcolor' />
+  <input type='checkbox' id='spooltranslucent' name='spooltranslucent' /> <label for='spooltranslucent'>Translucent</label><br>
+  <label for='spoolnetweight'>Net Weight</label> <input type='number' required id='spoolnetweight' name='spoolnetweight' />
+  <label for='spoolgrossweight'>Gross Weight</label> <input type='number' required id='spoolgrossweight' name='spoolgrossweight' /><br>
   <button class="sb-button-primary" data-item="newspool" onclick='javascript:document.getElementById("newspooldata").value ="br="+encodeURIComponent(document.getElementById("spoolbrand").value)+"&mt="+encodeURIComponent(document.getElementById("spoolmaterial").value)+"&cl="+encodeURIComponent(document.getElementById("spoolcolor").value)+"&tl="+encodeURIComponent(document.getElementById("spooltranslucent").checked)+"&nw="+encodeURIComponent(document.getElementById("spoolnetweight").value)+"&gw="+encodeURIComponent(document.getElementById("spoolgrossweight").value);'>Save</button>
   <input type='hidden' id='newspooldata' value='test-data' />
   </div>
@@ -93,7 +93,7 @@ export async function renderPrintJobs(): Promise<string> {
     <td>${j.description}</td>
     <td>${j.spoolBrand}</td>
     <td>${j.spoolMaterial}</td>
-    <td>${j.spoolColorName}</td>
+    <td>${renderColor(j.spoolColor, j.spoolIsTranslucent)}</td>
     <td style='text-align: right;'>${j.filamentWeight}</td>
     <td style='text-align: right;'>${prettifyDuration(j.duration)}</td>
     <td>${j.notes ? j.notes : ""}</td>
@@ -106,6 +106,10 @@ export async function renderPrintJobs(): Promise<string> {
   </div>`;
 
   return html;
+}
+
+function renderColor(color: string, isTranslucent: boolean) {
+  return color + (isTranslucent ? "/TL" : "");
 }
 
 export async function click(dataItem: string, args: string) {
@@ -197,7 +201,7 @@ export async function click(dataItem: string, args: string) {
       id: newUUID(),
       brand: spoolBrand,
       material: spoolMaterial,
-      colorName: spoolColor,
+      color: spoolColor,
       isTranslucent: spoolTranslucent,
       initialNetWeight: spoolNetWeight,
       grossWeight: spoolGrossWeight,
@@ -261,7 +265,7 @@ async function saveSpools(spools: Array<LiveSpool>) {
       id: s.id,
       brand: s.brand,
       material: s.material,
-      colorName: s.colorName,
+      color: s.color,
       isTranslucent: s.isTranslucent,
       grossWeight: s.grossWeight,
       initialNetWeight: s.initialNetWeight,
@@ -315,15 +319,15 @@ async function loadSpoolNames(jobs: Array<LivePrintJob>) {
   let spools = await getSpools();
 
   jobs.forEach((j) => {
-    j.spoolBrand = "n/a";
-    j.spoolMaterial = "n/a";
-    j.spoolColorName = "n/a";
+    j.spoolBrand = "";
+    j.spoolMaterial = "";
+    j.spoolColor = "";
 
     spools.forEach((s) => {
       if (s.id === j.spoolId) {
         j.spoolBrand = s.brand;
         j.spoolMaterial = s.material;
-        j.spoolColorName = s.colorName;
+        j.spoolColor = s.color;
         j.spoolIsTranslucent = s.isTranslucent;
       }
     });
@@ -404,7 +408,7 @@ type Spool = {
   id: string;
   brand: string;
   material: string;
-  colorName: string;
+  color: string;
   isTranslucent: boolean;
   grossWeight: number;
   initialNetWeight: number;
@@ -428,6 +432,6 @@ type PrintJob = {
 type LivePrintJob = PrintJob & {
   spoolBrand: string;
   spoolMaterial: string;
-  spoolColorName: string;
+  spoolColor: string;
   spoolIsTranslucent: boolean
 }
