@@ -2,3 +2,10 @@ name: silverspooler
 functions:
   renderSpools:
     path: silverspooler.ts:renderSpools
+  renderPrintJobs:
+    path: silverspooler.ts:renderPrintJobs
+  refresh:
+    path: silverspooler.ts:refresh
+    command:
+      name: "SilverSpooler: Refresh"
+      

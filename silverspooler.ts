@@ -1,4 +1,4 @@
-import { space, system } from "@silverbulletmd/silverbullet/syscalls";
+import { space, system, editor, codeWidget } from "@silverbulletmd/silverbullet/syscalls";
 import { parse, stringify } from "jsr:@std/yaml";
 
 const SPOOLS_FILE = "spools.yaml";
@@ -7,7 +7,7 @@ const JOBS_FILE = "jobs.yaml";
 export async function renderSpools(): Promise<string> {
   let spools = await getSpools();
 
-  let html = `<div class='silverspooler'>
+  let html = `<div class='silverspooler spools'>
   <table>
   <thead>
     <tr>
@@ -21,11 +21,57 @@ export async function renderSpools(): Promise<string> {
   <tbody>`;
 
   spools.forEach((s) => {
-    html += `<tr>
+    html += `<tr class='${s.isRetired ? "retired" : "active"}'>
     <td>${s.brand}</td>
     <td>${s.material}</td>
-    <td>${s.colorName}${s.isTranslucent ? "/TL" : ""}</td>
-    <td style='text-align: right;' title="${s.grossWeight ? 'Gross: ' + s.grossWeight : ''}">${s.remainingWeight} / ${s.initialNetWeight}</td>
+    <td>${s.colorName}${s.isTranslucent ? "/TL" : ""}</td>`;
+
+    if (s.isRetired) {
+      html += "<td style='text-align: right;' class='remaining'>Retired</td>"
+    }
+    else {
+      html += `<td style='text-align: right;' class='remaining' title="${s.grossWeight ? 'Gross: ' + s.grossWeight : ''}">${s.remainingWeight} / ${s.initialNetWeight}</td>`;
+    }
+
+    html += `<td>TODO</td>
+    </tr>`;
+  });
+
+  html += `</tbody>
+  </table>
+  </div>`;
+
+  return html;
+}
+
+export async function renderPrintJobs(): Promise<string> {
+  let jobs = await getPrintJobs();
+
+  let html = `<div class='silverspooler printjobs'>
+  <table>
+  <thead>
+    <tr>
+      <td style='text-align: right;'>Date</td>
+      <td>Description</td>
+      <td colspan='3'>Spool</td>
+      <td style='text-align: right;'>Used Weight</td>
+      <td style='text-align: right;'>Duration</td>
+      <td>Notes</td>
+      <td></td>
+    </tr>
+  </thead>
+  <tbody>`;
+
+  jobs.forEach((j) => {
+    html += `<tr>
+    <td style='text-align: right;'>${new Date(j.date).toLocaleDateString()}</td>
+    <td>${j.description}</td>
+    <td>${j.spoolBrand}</td>
+    <td>${j.spoolMaterial}</td>
+    <td>${j.spoolColorName}</td>
+    <td style='text-align: right;'>${j.filamentWeight}</td>
+    <td style='text-align: right;'>${prettifyDuration(j.duration)}</td>
+    <td>${j.notes ? j.notes : ""}</td>
     <td>TODO</td>
     </tr>`;
   });
@@ -37,6 +83,15 @@ export async function renderSpools(): Promise<string> {
   return html;
 }
 
+export async function refresh() {
+  // This might not be enough without a forced space sync?
+  _config = null;
+  _spools = null;
+  _jobs = null;
+  codeWidget.refreshAll();
+  editor.flashNotification("SilverSpooler data refreshed.");
+}
+
 var _spools: Array<LiveSpool>;
 async function getSpools(): Promise<Array<LiveSpool>> {
   if (_spools === undefined || _spools === null) {
@@ -45,8 +100,8 @@ async function getSpools(): Promise<Array<LiveSpool>> {
     let spoolsData = uint8ArrayToString(await space.readDocument(sf));
 
     if (hasContent(spoolsData)) {
-      _spools = parse(spoolsData).spools as Array<LiveSpool>;
-      loadRemainingWeight(_spools);
+      _spools = await parse(spoolsData).spools as Array<LiveSpool>;
+      await loadRemainingWeight(_spools);
     }
     else {
       _spools = new Array<LiveSpool>();
@@ -58,7 +113,7 @@ async function getSpools(): Promise<Array<LiveSpool>> {
   return _spools;
 }
 
-async function loadRemainingWeight(spools: Array<LiveSpool>): Promise<void> {
+async function loadRemainingWeight(spools: Array<LiveSpool>) {
   let jobs = await getPrintJobs();
 
   spools.forEach((s) => {
@@ -73,24 +128,60 @@ async function loadRemainingWeight(spools: Array<LiveSpool>): Promise<void> {
   });
 }
 
-var _jobs: Array<PrintJob>;
-async function getPrintJobs(): Promise<Array<PrintJob>> {
+var _jobs: Array<LivePrintJob>;
+async function getPrintJobs(): Promise<Array<LivePrintJob>> {
   if (_jobs === undefined || _jobs === null) {
     let jf = await getFilePath(JOBS_FILE);
     log("Loading jobs from " + jf);
     let jobsData = uint8ArrayToString(await space.readDocument(jf));
 
     if (hasContent(jobsData)) {
-      _jobs = parse(jobsData).jobs as Array<PrintJob>;
+      // No sort to preserve performance
+      _jobs = await parse(jobsData).jobs as Array<LivePrintJob>;
+      await loadSpoolNames(_jobs);
     }
     else {
-      _jobs = new Array<PrintJob>();
+      _jobs = new Array<LivePrintJob>();
     }
 
     log("Loaded jobs: " + _jobs.length);
   }
 
   return _jobs;
+}
+
+async function loadSpoolNames(jobs: Array<LivePrintJob>) {
+  let spools = await getSpools();
+
+  jobs.forEach((j) => {
+    j.spoolBrand = "n/a";
+    j.spoolMaterial = "n/a";
+    j.spoolColor = "n/a";
+
+    spools.forEach((s) => {
+      if (s.id === j.spoolId) {
+        j.spoolBrand = s.brand;
+        j.spoolMaterial = s.material;
+        j.spoolColorName = s.colorName;
+        j.spoolIsTranslucent = s.isTranslucent;
+      }
+    });
+  });
+}
+
+function prettifyDuration(duration: number): string {
+  const hours = Math.floor(duration / 60);
+  const minutes = duration % 60;
+
+  // Pad minutes with a leading zero if it's less than 10
+  const paddedMinutes = minutes < 10 ? `0${minutes}` : `${minutes}`;
+
+  if (hours > 0) {
+    return `${hours}h ${paddedMinutes}m`;
+  }
+  else {
+    return `${paddedMinutes}m`;
+  }
 }
 
 async function getFilePath(fileName: string): Promise<string> {
@@ -142,11 +233,10 @@ type Spool = {
   brand: string;
   material: string;
   colorName: string;
-  isTranslucent?: boolean;
-  diameter?: number;
+  isTranslucent: boolean;
   grossWeight?: number;
   initialNetWeight: number;
-  isRetired?: boolean;
+  isRetired: boolean;
 };
 
 type LiveSpool = Spool & {
@@ -157,8 +247,15 @@ type PrintJob = {
   id: string;
   spoolId: string;
   date: string;
-  description?: string;
+  description: string;
   filamentWeight: number;
   duration: number;
-  notes?: string;
+  notes: string;
+}
+
+type LivePrintJob = PrintJob & {
+  spoolBrand: string;
+  spoolMaterial: string;
+  spoolColorName: string;
+  spoolIsTranslucent: boolean
 }
