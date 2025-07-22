@@ -32,7 +32,7 @@ export async function renderSpools(excludeRetired: boolean | true): Promise<stri
       }
       else {
         html += `<td style='text-align: right;' class='remaining' title="${s.grossWeight ? 'Gross: ' + s.grossWeight : ''}">${s.remainingWeight} / ${s.initialNetWeight}</td>`;
-        html += "<td>TODO</td>";
+        html += `<td><button class='sb-button-primary spoolretire' data-item='retire|${s.id}'>Retire</button></td>`;
       }
 
       html += "</tr>";
@@ -83,6 +83,16 @@ export async function renderPrintJobs(): Promise<string> {
   </div>`;
 
   return html;
+}
+
+export async function click(dataItem: string) {
+  if (hasContent(dataItem) && dataItem.startsWith("retire|")) {
+    let spoolId = dataItem.substring(7);
+    log("Retiring spool " + spoolId);
+  }
+  else {
+    log("Invalid click data.")
+  }
 }
 
 export async function refresh() {

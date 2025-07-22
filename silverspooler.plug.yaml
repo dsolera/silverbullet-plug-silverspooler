@@ -4,8 +4,9 @@ functions:
     path: silverspooler.ts:renderSpools
   renderPrintJobs:
     path: silverspooler.ts:renderPrintJobs
+  click:
+    path: silverspooler.ts:click
   refresh:
     path: silverspooler.ts:refresh
     command:
       name: "SilverSpooler: Refresh"
-      
