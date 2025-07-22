@@ -4,7 +4,7 @@ import { parse, stringify } from "jsr:@std/yaml";
 const SPOOLS_FILE = "spools.yaml";
 const JOBS_FILE = "jobs.yaml";
 
-export async function renderSpools(): Promise<string> {
+export async function renderSpools(excludeRetired: boolean | true): Promise<string> {
   let spools = await getSpools();
 
   let html = `<div class='silverspooler spools'>
@@ -21,20 +21,22 @@ export async function renderSpools(): Promise<string> {
   <tbody>`;
 
   spools.forEach((s) => {
-    html += `<tr class='${s.isRetired ? "retired" : "active"}'>
-    <td>${s.brand}</td>
-    <td>${s.material}</td>
-    <td>${s.colorName}${s.isTranslucent ? "/TL" : ""}</td>`;
+    if (!excludeRetired || (excludeRetired && !s.isRetired)) {
+      html += `<tr class='${s.isRetired ? "retired" : "active"}'>
+      <td>${s.brand}</td>
+      <td>${s.material}</td>
+      <td>${s.colorName}${s.isTranslucent ? "/TL" : ""}</td>`;
 
-    if (s.isRetired) {
-      html += "<td style='text-align: right;' class='remaining'>Retired</td>"
-    }
-    else {
-      html += `<td style='text-align: right;' class='remaining' title="${s.grossWeight ? 'Gross: ' + s.grossWeight : ''}">${s.remainingWeight} / ${s.initialNetWeight}</td>`;
-    }
+      if (s.isRetired) {
+        html += "<td style='text-align: right;' class='remaining'>Retired</td><td></td>"
+      }
+      else {
+        html += `<td style='text-align: right;' class='remaining' title="${s.grossWeight ? 'Gross: ' + s.grossWeight : ''}">${s.remainingWeight} / ${s.initialNetWeight}</td>`;
+        html += "<td>TODO</td>";
+      }
 
-    html += `<td>TODO</td>
-    </tr>`;
+      html += "</tr>";
+    }
   });
 
   html += `</tbody>
