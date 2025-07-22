@@ -1,6 +1,4 @@
 name: silverspooler
 functions:
-  helloWorld:
-    path: silverspooler.ts:helloWorld
-    command:
-      name: "Say hello"
+  renderSpools:
+    path: silverspooler.ts:renderSpools
