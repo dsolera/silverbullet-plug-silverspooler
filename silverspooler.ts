@@ -26,11 +26,11 @@ export async function renderSpools(excludeRetired: boolean | true): Promise<stri
     <td><input type='text' required id='spoolbrand' placeholder='New Brand' style='width: 100%;' /></td>
     <td><input type='text' required id='spoolmaterial' placeholder='New Material' style='width: 100%;' /></td>
     <td><input type='color' required id='spoolcolor' /><input type='checkbox' id='spooltranslucent' /> <label for='spooltranslucent' title='Translucent or transparent filament'>TL</label></td>
-    <td></td>
+    <td style='text-align: right;'>&mdash;</td>
     <td style='text-align: right;'><input type='number' required id='spoolnetweight' style='width: 60%;' /></td>
     <td style='text-align: right;'><input type='number' required id='spoolgrossweight' style='width: 60%;' /></td>
     <td>
-      <button class="sb-button-primary" data-item="newspool" onclick='javascript:document.getElementById("newspooldata").value ="br="+encodeURIComponent(document.getElementById("spoolbrand").value)+"&mt="+encodeURIComponent(document.getElementById("spoolmaterial").value)+"&cl="+encodeURIComponent(document.getElementById("spoolcolor").value)+"&tl="+encodeURIComponent(document.getElementById("spooltranslucent").checked)+"&nw="+encodeURIComponent(document.getElementById("spoolnetweight").value)+"&gw="+encodeURIComponent(document.getElementById("spoolgrossweight").value);'>Add New</button>
+      <button class="sb-button-primary" data-item="newspool" onclick='javascript:document.getElementById("newspooldata").value ="br="+encodeURIComponent(document.getElementById("spoolbrand").value)+"&mt="+encodeURIComponent(document.getElementById("spoolmaterial").value)+"&cl="+encodeURIComponent(document.getElementById("spoolcolor").value)+"&tl="+encodeURIComponent(document.getElementById("spooltranslucent").checked)+"&nw="+encodeURIComponent(document.getElementById("spoolnetweight").value)+"&gw="+encodeURIComponent(document.getElementById("spoolgrossweight").value);'>Add</button>
       <input type='hidden' id='newspooldata' value='test-data' />
     </td></tr>`;
 
@@ -66,7 +66,7 @@ export async function renderSpools(excludeRetired: boolean | true): Promise<stri
 
   html += "</tbody>"
 
-  html += `<tfoot><tr><td colspan='3'>${displayedSpools} Spools</td><td style='text-align: right;'>${totalRemaining}</td><td style='text-align: right;'>${totalInitial}</td><td></td><td></td></tr></tfoot>`
+  html += `<tfoot><tr><td colspan='3'>${displayedSpools} Spools</td><td style='text-align: right;'>${totalRemaining}</td><td style='text-align: right;'>${totalInitial}</td><td style='text-align: right;'>&mdash;</td><td></td></tr></tfoot>`
 
   html += "</table></div>";
 

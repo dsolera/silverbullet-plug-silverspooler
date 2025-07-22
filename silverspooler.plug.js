@@ -41,11 +41,11 @@ ${" ".repeat(e*t)}`}function re(e){return 32<=e&&e<=126||161<=e&&e<=55295&&e!==8
     <td><input type='text' required id='spoolbrand' placeholder='New Brand' style='width: 100%;' /></td>
     <td><input type='text' required id='spoolmaterial' placeholder='New Material' style='width: 100%;' /></td>
     <td><input type='color' required id='spoolcolor' /><input type='checkbox' id='spooltranslucent' /> <label for='spooltranslucent' title='Translucent or transparent filament'>TL</label></td>
-    <td></td>
+    <td style='text-align: right;'>&mdash;</td>
     <td style='text-align: right;'><input type='number' required id='spoolnetweight' style='width: 60%;' /></td>
     <td style='text-align: right;'><input type='number' required id='spoolgrossweight' style='width: 60%;' /></td>
     <td>
-      <button class="sb-button-primary" data-item="newspool" onclick='javascript:document.getElementById("newspooldata").value ="br="+encodeURIComponent(document.getElementById("spoolbrand").value)+"&mt="+encodeURIComponent(document.getElementById("spoolmaterial").value)+"&cl="+encodeURIComponent(document.getElementById("spoolcolor").value)+"&tl="+encodeURIComponent(document.getElementById("spooltranslucent").checked)+"&nw="+encodeURIComponent(document.getElementById("spoolnetweight").value)+"&gw="+encodeURIComponent(document.getElementById("spoolgrossweight").value);'>Add New</button>
+      <button class="sb-button-primary" data-item="newspool" onclick='javascript:document.getElementById("newspooldata").value ="br="+encodeURIComponent(document.getElementById("spoolbrand").value)+"&mt="+encodeURIComponent(document.getElementById("spoolmaterial").value)+"&cl="+encodeURIComponent(document.getElementById("spoolcolor").value)+"&tl="+encodeURIComponent(document.getElementById("spooltranslucent").checked)+"&nw="+encodeURIComponent(document.getElementById("spoolnetweight").value)+"&gw="+encodeURIComponent(document.getElementById("spoolgrossweight").value);'>Add</button>
       <input type='hidden' id='newspooldata' value='test-data' />
     </td></tr>`;let r=0,i=0,o=0;return t.forEach(s=>{(!e||e&&!s.isRetired)&&(n+=`<tr class='${s.isRetired?"retired":"active"}'>
       <td>${s.brand}</td>
@@ -53,7 +53,7 @@ ${" ".repeat(e*t)}`}function re(e){return 32<=e&&e<=126||161<=e&&e<=55295&&e!==8
       <td>${Tt(s.color,s.isTranslucent)}</td>`,s.isRetired?n+="<td style='text-align: right;' class='remaining'>&mdash;</td><td style='text-align: right;'>&mdash;</td><td style='text-align: right;'>&mdash;</td><td></td>":(n+=`
         <td style='text-align: right;' class='left'">${s.remainingWeight}</td>
         <td style='text-align: right;' class="net">${s.initialNetWeight}</td>
-        <td style='text-align: right;' class="gross">${s.grossWeight}</td>`,n+=`<td style='text-align: center;'><button class='sb-button-primary spoolretire' data-item='retire|${s.id}'>Retire</button></td>`),n+="</tr>",r++,i+=s.initialNetWeight,o+=s.remainingWeight)}),n+="</tbody>",n+=`<tfoot><tr><td colspan='3'>${r} Spools</td><td style='text-align: right;'>${o}</td><td style='text-align: right;'>${i}</td><td></td><td></td></tr></tfoot>`,n+="</table></div>",n}async function kt(){let e=await At(),t=`<div class='silverspooler printjobs'>
+        <td style='text-align: right;' class="gross">${s.grossWeight}</td>`,n+=`<td style='text-align: center;'><button class='sb-button-primary spoolretire' data-item='retire|${s.id}'>Retire</button></td>`),n+="</tr>",r++,i+=s.initialNetWeight,o+=s.remainingWeight)}),n+="</tbody>",n+=`<tfoot><tr><td colspan='3'>${r} Spools</td><td style='text-align: right;'>${o}</td><td style='text-align: right;'>${i}</td><td style='text-align: right;'>&mdash;</td><td></td></tr></tfoot>`,n+="</table></div>",n}async function kt(){let e=await At(),t=`<div class='silverspooler printjobs'>
   <table>
   <thead>
     <tr>
