@@ -17,7 +17,7 @@ export async function renderSpools(excludeRetired: boolean | true): Promise<stri
       <td style='text-align: right;'>Left</td>
       <td style='text-align: right;'>Original</td>
       <td style='text-align: right;'>Gross</td>
-      <td></td>
+      <td style='text-align: center;'></td>
     </tr>
   </thead>
   <tbody>`;
@@ -37,7 +37,7 @@ export async function renderSpools(excludeRetired: boolean | true): Promise<stri
         <td style='text-align: right;' class='left'">${s.remainingWeight}</td>
         <td style='text-align: right;' class="net">${s.initialNetWeight}</td>
         <td style='text-align: right;' class="gross">${s.grossWeight}</td>`;
-        html += `<td><button class='sb-button-primary spoolretire' data-item='retire|${s.id}'>Retire</button></td>`;
+        html += `<td style='text-align: center;'><button class='sb-button-primary spoolretire' data-item='retire|${s.id}'>Retire</button></td>`;
       }
 
       html += "</tr>";
@@ -82,7 +82,7 @@ export async function renderPrintJobs(): Promise<string> {
       <td style='text-align: right;'>Weight</td>
       <td style='text-align: right;'>Duration</td>
       <td>Notes</td>
-      <td></td>
+      <td style='text-align: center;'></td>
     </tr>
   </thead>
   <tbody>`;
@@ -97,7 +97,7 @@ export async function renderPrintJobs(): Promise<string> {
     <td style='text-align: right;'>${j.filamentWeight}</td>
     <td style='text-align: right;'>${prettifyDuration(j.duration)}</td>
     <td>${j.notes ? j.notes : ""}</td>
-    <td>TODO</td>
+    <td style='text-align: center;'>TODO</td>
     </tr>`;
   });
 
@@ -109,7 +109,14 @@ export async function renderPrintJobs(): Promise<string> {
 }
 
 function renderColor(color: string, isTranslucent: boolean) {
-  return color + (isTranslucent ? "/TL" : "");
+  let rgba = color + (isTranslucent ? "55" : "FF");
+
+  if (isTranslucent) {
+    return `<span title='${color}/TL'><span style="background-color: ${color}; color: ${color};">&nbsp;&bull;&bull;&bull;&nbsp;</span><span style="background-color: ${rgba};">&nbsp;<span style="color: white;">&bull;</span><span style='color: lightgrey;'>&bull;</span><span style="color: black;">&bull;</span>&nbsp;</span></span>`;
+  }
+  else {
+    return `<span title='${color}'><span style="background-color: ${color}; color: ${color};">&nbsp;&bull;&bull;&bull;&nbsp;</span><span style="background-color: ${color}; color: ${color};">&nbsp;&bull;&bull;&bull;&nbsp;</span></span>`;
+  }
 }
 
 export async function click(dataItem: string, args: string) {
@@ -158,7 +165,7 @@ export async function click(dataItem: string, args: string) {
         spoolMaterial = tuple[1];
       }
       else if (tuple[0] == "cl") {
-        spoolColor = tuple[1];
+        spoolColor = tuple[1].toUpperCase();
       }
       else if (tuple[0] == "tl") {
         tuple[1] = tuple[1].toLowerCase();
