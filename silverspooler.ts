@@ -46,6 +46,24 @@ export async function renderSpools(excludeRetired: boolean | true): Promise<stri
   return html;
 }
 
+export async function renderNewSpool(): Promise<string> {
+  let html = `
+  <button class='sb-button-primary' onclick='javascript:document.getElementById("new-spool").style["display"] = ""; this.style["display"] = "none";'>Add New Spool</button>
+  <div id='new-spool' style='display: none;'>
+  <input type='text' required id='spoolbrand' placeholder='Filament Brand' />
+  <input type='text' required id='spoolmaterial' placeholder='Filament Material' />
+  <input type='text' required id='spoolcolor' placeholder='Filament Color' />
+  <input type='checkbox' id='spooltranslucent' /> <label>Translucent</label><br>
+  <label>Net Weight</label> <input type='number' required id='spoolnetweight' />
+  <label>Gross Weight</label> <input type='number' required id='spoolgrossweight' /><br>
+  <button class="sb-button-primary" data-item="newspool" onclick='javascript:document.getElementById("newspooldata").value ="br="+encodeURIComponent(document.getElementById("spoolbrand").value)+"&mt="+encodeURIComponent(document.getElementById("spoolmaterial").value)+"&cl="+encodeURIComponent(document.getElementById("spoolcolor").value)+"&tl="+encodeURIComponent(document.getElementById("spooltranslucent").checked)+"&nw="+encodeURIComponent(document.getElementById("spoolnetweight").value)+"&gw="+encodeURIComponent(document.getElementById("spoolgrossweight").value);'>Save</button>
+  <input type='hidden' id='newspooldata' value='test-data' />
+  </div>
+  `;
+
+  return html;
+}
+
 export async function renderPrintJobs(): Promise<string> {
   let jobs = await getPrintJobs();
 
@@ -85,8 +103,12 @@ export async function renderPrintJobs(): Promise<string> {
   return html;
 }
 
-export async function click(dataItem: string) {
-  if (hasContent(dataItem) && dataItem.startsWith("retire|")) {
+export async function click(dataItem: string, args: string) {
+  if (!hasContent(dataItem)) {
+    return;
+  }
+
+  if (dataItem.startsWith("retire|")) {
     let confirmed = await editor.confirm("Are you sure you want to retire that spool?");
     if (confirmed) {
       let spoolId = dataItem.substring(7);
@@ -101,6 +123,89 @@ export async function click(dataItem: string) {
         }
       };
     }
+  }
+  else if (dataItem == "newspool") {
+    if (!hasContent(args)) {
+      log("No valid arguments.");
+      return;
+    }
+
+    let pairs = args.split("&");
+    let spoolBrand: string = "";
+    let spoolMaterial: string = "";
+    let spoolColor: string = "";
+    let spoolTranslucent: boolean = false;
+    let spoolNetWeight: number = 0;
+    let spoolGrossWeight: number = 0;
+
+    for (const p of pairs) {
+      let tuple = p.split('=');
+      tuple[1] = decodeURIComponent(tuple[1]);
+
+      if (tuple[0] == "br") {
+        spoolBrand = tuple[1];
+      }
+      else if (tuple[0] == "mt") {
+        spoolMaterial = tuple[1];
+      }
+      else if (tuple[0] == "cl") {
+        spoolColor = tuple[1];
+      }
+      else if (tuple[0] == "tl") {
+        tuple[1] = tuple[1].toLowerCase();
+        spoolTranslucent = tuple[1] === "true" || tuple[1] === "1" || tuple[1] === "on";
+      }
+      else if (tuple[0] == "nw") {
+        spoolNetWeight = Number(tuple[1]);
+      }
+      else if (tuple[0] == "gw") {
+        spoolGrossWeight = Number(tuple[1]);
+      }
+    }
+
+    if (!hasContent(spoolBrand)) {
+      editor.flashNotification("Please specify spool Brand.");
+      return;
+    }
+    if (!hasContent(spoolMaterial)) {
+      editor.flashNotification("Please specify spool Material.");
+      return;
+    }
+    if (!hasContent(spoolColor)) {
+      editor.flashNotification("Please specify spool Color.");
+      return;
+    }
+    if (spoolNetWeight <= 0 || spoolNetWeight > 10000) {
+      editor.flashNotification("Please specify a spool Net Weight between 1 and 10000.");
+      return;
+    }
+    if (spoolGrossWeight <= 0 || spoolGrossWeight > 10000) {
+      editor.flashNotification("Please specify a spool Gross Weight between 1 and 10000.");
+      return;
+    }
+    if (spoolGrossWeight <= spoolNetWeight) {
+      editor.flashNotification("Please specify a spool Gross Weight larger than Net Weight.");
+      return;
+    }
+
+    let newSpool: LiveSpool = {
+      id: newUUID(),
+      brand: spoolBrand,
+      material: spoolMaterial,
+      colorName: spoolColor,
+      isTranslucent: spoolTranslucent,
+      initialNetWeight: spoolNetWeight,
+      grossWeight: spoolGrossWeight,
+      isRetired: false,
+      remainingWeight: spoolNetWeight
+    };
+
+    let spools = await getSpools();
+
+    spools.push(newSpool);
+
+    await saveSpools(spools);
+    await refreshInternal("New spool saved.")
   }
   else {
     log("Invalid click data.");
@@ -273,6 +378,13 @@ function hasContent(data: string): boolean {
   else {
     return false;
   }
+}
+
+function newUUID(): string {
+  let uuid = crypto.randomUUID();
+
+  // Remove dashes and brackets
+  return uuid.replace(/[{}()-]/g, '');
 }
 
 function log(message: string) {
