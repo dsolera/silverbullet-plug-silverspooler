@@ -2,6 +2,7 @@ import { space, system } from "@silverbulletmd/silverbullet/syscalls";
 import { parse, stringify } from "jsr:@std/yaml";
 
 const SPOOLS_FILE = "spools.yaml";
+const JOBS_FILE = "jobs.yaml";
 
 export async function renderSpools(): Promise<string> {
   let spools = await getSpools();
@@ -24,7 +25,7 @@ export async function renderSpools(): Promise<string> {
     <td>${s.brand}</td>
     <td>${s.material}</td>
     <td>${s.colorName}${s.isTranslucent ? "/TL" : ""}</td>
-    <td style='text-align: right;'>TODO</td>
+    <td style='text-align: right;' title="${s.grossWeight ? 'Gross: ' + s.grossWeight : ''}">${s.remainingWeight} / ${s.initialNetWeight}</td>
     <td>TODO</td>
     </tr>`;
   });
@@ -36,22 +37,60 @@ export async function renderSpools(): Promise<string> {
   return html;
 }
 
-var _spools: Array<Spool>;
-async function getSpools(): Promise<Array<Spool>> {
+var _spools: Array<LiveSpool>;
+async function getSpools(): Promise<Array<LiveSpool>> {
   if (_spools === undefined || _spools === null) {
     let sf = await getFilePath(SPOOLS_FILE);
     log("Loading spools from " + sf);
     let spoolsData = uint8ArrayToString(await space.readDocument(sf));
 
     if (hasContent(spoolsData)) {
-      _spools = parse(spoolsData).spools as Array<Spool>;
+      _spools = parse(spoolsData).spools as Array<LiveSpool>;
+      loadRemainingWeight(_spools);
     }
     else {
-      _spools = new Array<Spool>();
+      _spools = new Array<LiveSpool>();
     }
+
+    log("Loaded spools: " + _spools.length);
   }
 
   return _spools;
+}
+
+async function loadRemainingWeight(spools: Array<LiveSpool>): Promise<void> {
+  let jobs = await getPrintJobs();
+
+  spools.forEach((s) => {
+    if (s.remainingWeight === undefined || s.remainingWeight === null) {
+      s.remainingWeight = s.initialNetWeight;
+    }
+    jobs.forEach((j) => {
+      if (j.spoolId === s.id) {
+        s.remainingWeight -= j.filamentWeight;
+      }
+    });
+  });
+}
+
+var _jobs: Array<PrintJob>;
+async function getPrintJobs(): Promise<Array<PrintJob>> {
+  if (_jobs === undefined || _jobs === null) {
+    let jf = await getFilePath(JOBS_FILE);
+    log("Loading jobs from " + jf);
+    let jobsData = uint8ArrayToString(await space.readDocument(jf));
+
+    if (hasContent(jobsData)) {
+      _jobs = parse(jobsData).jobs as Array<PrintJob>;
+    }
+    else {
+      _jobs = new Array<PrintJob>();
+    }
+
+    log("Loaded jobs: " + _jobs.length);
+  }
+
+  return _jobs;
 }
 
 async function getFilePath(fileName: string): Promise<string> {
@@ -103,13 +142,16 @@ type Spool = {
   brand: string;
   material: string;
   colorName: string;
-  isTranslucent?: boolean | false;
-  diameter?: number | 1.75;
-  grossWeight?: number | null;
-  initialNetWeight?: number | 1000;
-  isRetired?: boolean | false;
-  remainingWeight?: number | 0;
+  isTranslucent?: boolean;
+  diameter?: number;
+  grossWeight?: number;
+  initialNetWeight: number;
+  isRetired?: boolean;
 };
+
+type LiveSpool = Spool & {
+  remainingWeight?: number;
+}
 
 type PrintJob = {
   id: string;
