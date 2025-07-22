@@ -34,6 +34,10 @@ export async function renderSpools(excludeRetired: boolean | true): Promise<stri
       <input type='hidden' id='newspooldata' value='test-data' />
     </td></tr>`;
 
+  let displayedSpools = 0;
+  let totalInitial = 0;
+  let totalRemaining = 0;
+
   spools.forEach((s) => {
     if (!excludeRetired || (excludeRetired && !s.isRetired)) {
       html += `<tr class='${s.isRetired ? "retired" : "active"}'>
@@ -53,12 +57,18 @@ export async function renderSpools(excludeRetired: boolean | true): Promise<stri
       }
 
       html += "</tr>";
+
+      displayedSpools++;
+      totalInitial += s.initialNetWeight;
+      totalRemaining += s.remainingWeight;
     }
   });
 
-  html += `</tbody>
-  </table>
-  </div>`;
+  html += "</tbody>"
+
+  html += `<tfoot><tr><td colspan='3'>${displayedSpools} Spools</td><td style='text-align: right;'>${totalRemaining}</td><td style='text-align: right;'>${totalInitial}</td><td></td><td></td></tr></tfoot>`
+
+  html += "</table></div>";
 
   return html;
 }
