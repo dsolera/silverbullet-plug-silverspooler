@@ -1,5 +1,5 @@
 import { space, system, editor, codeWidget } from "@silverbulletmd/silverbullet/syscalls";
-import { parse, stringify } from "jsr:@std/yaml";
+import { parse as yamlparse, stringify as yamlstringify } from "jsr:@std/yaml";
 
 const SPOOLS_FILE = "spools.yaml";
 const JOBS_FILE = "jobs.yaml";
@@ -31,7 +31,7 @@ export async function renderSpools(excludeRetired: boolean | true): Promise<stri
         html += "<td style='text-align: right;' class='remaining'>Retired</td><td></td>"
       }
       else {
-        html += `<td style='text-align: right;' class='remaining' title="${s.grossWeight ? 'Gross: ' + s.grossWeight : ''}">${s.remainingWeight} / ${s.initialNetWeight}</td>`;
+        html += `<td style='text-align: right;' class='remaining'">${s.remainingWeight} / ${s.initialNetWeight} / ${s.grossWeight}</td>`;
         html += `<td><button class='sb-button-primary spoolretire' data-item='retire|${s.id}'>Retire</button></td>`;
       }
 
@@ -56,7 +56,7 @@ export async function renderPrintJobs(): Promise<string> {
       <td style='text-align: right;'>Date</td>
       <td>Description</td>
       <td colspan='3'>Spool</td>
-      <td style='text-align: right;'>Used Weight</td>
+      <td style='text-align: right;'>Weight</td>
       <td style='text-align: right;'>Duration</td>
       <td>Notes</td>
       <td></td>
@@ -87,11 +87,23 @@ export async function renderPrintJobs(): Promise<string> {
 
 export async function click(dataItem: string) {
   if (hasContent(dataItem) && dataItem.startsWith("retire|")) {
-    let spoolId = dataItem.substring(7);
-    log("Retiring spool " + spoolId);
+    let confirmed = await editor.confirm("Are you sure you want to retire that spool?");
+    if (confirmed) {
+      let spoolId = dataItem.substring(7);
+
+      let spools = await getSpools();
+      for (const s of spools) {
+        if (s.id == spoolId) {
+          s.isRetired = true;
+          await saveSpools(spools);
+          await refreshInternal("Spool retired.");
+          break;
+        }
+      };
+    }
   }
   else {
-    log("Invalid click data.")
+    log("Invalid click data.");
   }
 }
 
@@ -100,8 +112,12 @@ export async function refresh() {
   _config = null;
   _spools = null;
   _jobs = null;
-  codeWidget.refreshAll();
-  editor.flashNotification("SilverSpooler data refreshed.");
+  await refreshInternal("SilverSpooler data refreshed.");
+}
+
+async function refreshInternal(message: string) {
+  await codeWidget.refreshAll();
+  await editor.flashNotification(message);
 }
 
 var _spools: Array<LiveSpool> | null;
@@ -112,7 +128,7 @@ async function getSpools(): Promise<Array<LiveSpool>> {
     let spoolsData = uint8ArrayToString(await space.readDocument(sf));
 
     if (hasContent(spoolsData)) {
-      _spools = await parse(spoolsData).spools as Array<LiveSpool>;
+      _spools = await yamlparse(spoolsData).spools as Array<LiveSpool>;
       await loadRemainingWeight(_spools);
     }
     else {
@@ -123,6 +139,51 @@ async function getSpools(): Promise<Array<LiveSpool>> {
   }
 
   return _spools;
+}
+
+async function saveSpools(spools: Array<LiveSpool>) {
+  _spools = spools;
+
+  let staticSpools: Array<Spool> = new Array<Spool>();
+
+  for (const s of spools) {
+    staticSpools.push({
+      id: s.id,
+      brand: s.brand,
+      material: s.material,
+      colorName: s.colorName,
+      isTranslucent: s.isTranslucent,
+      grossWeight: s.grossWeight,
+      initialNetWeight: s.initialNetWeight,
+      isRetired: s.isRetired
+    } as Spool);
+  }
+
+  let rawData = await yamlstringify({ spools: staticSpools });
+
+  await space.writeDocument(await getFilePath(SPOOLS_FILE), stringToUint8Array(rawData));
+}
+
+var _jobs: Array<LivePrintJob> | null;
+async function getPrintJobs(): Promise<Array<LivePrintJob>> {
+  if (_jobs === undefined || _jobs === null) {
+    let jf = await getFilePath(JOBS_FILE);
+    log("Loading jobs from " + jf);
+    let jobsData = uint8ArrayToString(await space.readDocument(jf));
+
+    if (hasContent(jobsData)) {
+      // No sort to preserve performance
+      _jobs = await yamlparse(jobsData).jobs as Array<LivePrintJob>;
+      await loadSpoolNames(_jobs);
+    }
+    else {
+      _jobs = new Array<LivePrintJob>();
+    }
+
+    log("Loaded jobs: " + _jobs.length);
+  }
+
+  return _jobs;
 }
 
 async function loadRemainingWeight(spools: Array<LiveSpool>) {
@@ -138,28 +199,6 @@ async function loadRemainingWeight(spools: Array<LiveSpool>) {
       }
     });
   });
-}
-
-var _jobs: Array<LivePrintJob> | null;
-async function getPrintJobs(): Promise<Array<LivePrintJob>> {
-  if (_jobs === undefined || _jobs === null) {
-    let jf = await getFilePath(JOBS_FILE);
-    log("Loading jobs from " + jf);
-    let jobsData = uint8ArrayToString(await space.readDocument(jf));
-
-    if (hasContent(jobsData)) {
-      // No sort to preserve performance
-      _jobs = await parse(jobsData).jobs as Array<LivePrintJob>;
-      await loadSpoolNames(_jobs);
-    }
-    else {
-      _jobs = new Array<LivePrintJob>();
-    }
-
-    log("Loaded jobs: " + _jobs.length);
-  }
-
-  return _jobs;
 }
 
 async function loadSpoolNames(jobs: Array<LivePrintJob>) {
@@ -222,6 +261,10 @@ function uint8ArrayToString(array: Uint8Array, encoding: string = 'utf-8'): stri
   const decoder = new TextDecoder(encoding);
   return decoder.decode(array);
 }
+function stringToUint8Array(data: string): Uint8Array {
+  const encoder = new TextEncoder();
+  return encoder.encode(data);
+}
 
 function hasContent(data: string): boolean {
   if (typeof data === "string" && data.length > 0) {
@@ -246,13 +289,13 @@ type Spool = {
   material: string;
   colorName: string;
   isTranslucent: boolean;
-  grossWeight?: number;
+  grossWeight: number;
   initialNetWeight: number;
   isRetired: boolean;
 };
 
 type LiveSpool = Spool & {
-  remainingWeight?: number;
+  remainingWeight: number;
 }
 
 type PrintJob = {
