@@ -94,7 +94,7 @@ export async function refresh() {
   editor.flashNotification("SilverSpooler data refreshed.");
 }
 
-var _spools: Array<LiveSpool>;
+var _spools: Array<LiveSpool> | null;
 async function getSpools(): Promise<Array<LiveSpool>> {
   if (_spools === undefined || _spools === null) {
     let sf = await getFilePath(SPOOLS_FILE);
@@ -130,7 +130,7 @@ async function loadRemainingWeight(spools: Array<LiveSpool>) {
   });
 }
 
-var _jobs: Array<LivePrintJob>;
+var _jobs: Array<LivePrintJob> | null;
 async function getPrintJobs(): Promise<Array<LivePrintJob>> {
   if (_jobs === undefined || _jobs === null) {
     let jf = await getFilePath(JOBS_FILE);
@@ -158,7 +158,7 @@ async function loadSpoolNames(jobs: Array<LivePrintJob>) {
   jobs.forEach((j) => {
     j.spoolBrand = "n/a";
     j.spoolMaterial = "n/a";
-    j.spoolColor = "n/a";
+    j.spoolColorName = "n/a";
 
     spools.forEach((s) => {
       if (s.id === j.spoolId) {
@@ -192,7 +192,7 @@ async function getFilePath(fileName: string): Promise<string> {
   return pathPrefix + fileName;
 }
 
-var _config: SilverSpoolerConfig;
+var _config: SilverSpoolerConfig | null;
 async function getConfig(): Promise<SilverSpoolerConfig> {
   if (_config === undefined || _config === null) {
     log("Reading settings");
