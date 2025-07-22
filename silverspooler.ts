@@ -53,7 +53,7 @@ export async function renderSpools(excludeRetired: boolean | true): Promise<stri
         <td style='text-align: right;' class='left'">${s.remainingWeight}</td>
         <td style='text-align: right;' class="net">${s.initialNetWeight}</td>
         <td style='text-align: right;' class="gross">${s.grossWeight}</td>`;
-        html += `<td style='text-align: center;'><button class='sb-button-primary spoolretire' data-item='retire|${s.id}'>Retire</button></td>`;
+        html += `<td><button class='sb-button-primary spoolretire' data-item='retire|${s.id}'>Retire</button></td>`;
       }
 
       html += "</tr>";
@@ -86,7 +86,7 @@ export async function renderPrintJobs(): Promise<string> {
       <td style='text-align: right;'>Weight</td>
       <td style='text-align: right;'>Duration</td>
       <td>Notes</td>
-      <td style='text-align: center;'></td>
+      <td></td>
     </tr>
   </thead>
   <tbody>`;
@@ -101,7 +101,7 @@ export async function renderPrintJobs(): Promise<string> {
     <td style='text-align: right;'>${j.filamentWeight}</td>
     <td style='text-align: right;'>${prettifyDuration(j.duration)}</td>
     <td>${j.notes ? j.notes : ""}</td>
-    <td style='text-align: center;'>TODO</td>
+    <td>TODO</td>
     </tr>`;
   });
 
