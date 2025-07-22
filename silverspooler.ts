@@ -3,25 +3,37 @@ import { parse, stringify } from "jsr:@std/yaml";
 
 const SPOOLS_FILE = "spools.yaml";
 
-export async function renderSpools() {
+export async function renderSpools(): Promise<string> {
   let spools = await getSpools();
 
-  console.log(spools);
+  let html = `<div class='silverspooler'>
+  <table>
+  <thead>
+    <tr>
+      <td>Brand</td>
+      <td>Material</td>
+      <td>Color</td>
+      <td style='text-align: right;'>Remaining</td>
+      <td></td>
+    </tr>
+  </thead>
+  <tbody>`;
 
-  let s: Spool = {
-    id: "asd",
-    brand: "sss",
-    material: "vblakd",
-    colorName: "Blue",
-    initialNetWeight: 1000
-  }
+  spools.forEach((s) => {
+    html += `<tr>
+    <td>${s.brand}</td>
+    <td>${s.material}</td>
+    <td>${s.colorName}${s.isTranslucent ? "/TL" : ""}</td>
+    <td style='text-align: right;'>TODO</td>
+    <td>TODO</td>
+    </tr>`;
+  });
 
-  let ss: string = stringify(s);
+  html += `</tbody>
+  </table>
+  </div>`;
 
-  let sout: Spool = parse(ss) as Spool;
-
-  //console.log(ss);
-  //console.log(sout);
+  return html;
 }
 
 var _spools: Array<Spool>;
@@ -32,10 +44,10 @@ async function getSpools(): Promise<Array<Spool>> {
     let spoolsData = uint8ArrayToString(await space.readDocument(sf));
 
     if (hasContent(spoolsData)) {
-      _spools = parse(spoolsData) as Array<Spool>;
+      _spools = parse(spoolsData).spools as Array<Spool>;
     }
     else {
-      _spools = new Array<Spool>;
+      _spools = new Array<Spool>();
     }
   }
 
@@ -96,6 +108,7 @@ type Spool = {
   grossWeight?: number | null;
   initialNetWeight?: number | 1000;
   isRetired?: boolean | false;
+  remainingWeight?: number | 0;
 };
 
 type PrintJob = {
