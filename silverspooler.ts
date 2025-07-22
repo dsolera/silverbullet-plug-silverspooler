@@ -14,7 +14,9 @@ export async function renderSpools(excludeRetired: boolean | true): Promise<stri
       <td>Brand</td>
       <td>Material</td>
       <td>Color</td>
-      <td style='text-align: right;'>Remaining</td>
+      <td style='text-align: right;'>Left</td>
+      <td style='text-align: right;'>Original</td>
+      <td style='text-align: right;'>Gross</td>
       <td></td>
     </tr>
   </thead>
@@ -28,10 +30,13 @@ export async function renderSpools(excludeRetired: boolean | true): Promise<stri
       <td>${s.colorName}${s.isTranslucent ? "/TL" : ""}</td>`;
 
       if (s.isRetired) {
-        html += "<td style='text-align: right;' class='remaining'>Retired</td><td></td>"
+        html += "<td style='text-align: right;' class='remaining'>&mdash;</td><td style='text-align: right;'>&mdash;</td><td style='text-align: right;'>&mdash;</td><td></td>"
       }
       else {
-        html += `<td style='text-align: right;' class='remaining'">${s.remainingWeight} / ${s.initialNetWeight} / ${s.grossWeight}</td>`;
+        html += `
+        <td style='text-align: right;' class='left'">${s.remainingWeight}</td>
+        <td style='text-align: right;' class="net">${s.initialNetWeight}</td>
+        <td style='text-align: right;' class="gross">${s.grossWeight}</td>`;
         html += `<td><button class='sb-button-primary spoolretire' data-item='retire|${s.id}'>Retire</button></td>`;
       }
 

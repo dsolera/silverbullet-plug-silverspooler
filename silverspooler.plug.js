@@ -31,14 +31,19 @@ ${" ".repeat(e*t)}`}function re(e){return 32<=e&&e<=126||161<=e&&e<=55295&&e!==8
       <td>Brand</td>
       <td>Material</td>
       <td>Color</td>
-      <td style='text-align: right;'>Remaining</td>
+      <td style='text-align: right;'>Left</td>
+      <td style='text-align: right;'>Original</td>
+      <td style='text-align: right;'>Gross</td>
       <td></td>
     </tr>
   </thead>
   <tbody>`;return t.forEach(r=>{(!e||e&&!r.isRetired)&&(n+=`<tr class='${r.isRetired?"retired":"active"}'>
       <td>${r.brand}</td>
       <td>${r.material}</td>
-      <td>${r.colorName}${r.isTranslucent?"/TL":""}</td>`,r.isRetired?n+="<td style='text-align: right;' class='remaining'>Retired</td><td></td>":(n+=`<td style='text-align: right;' class='remaining'">${r.remainingWeight} / ${r.initialNetWeight} / ${r.grossWeight}</td>`,n+=`<td><button class='sb-button-primary spoolretire' data-item='retire|${r.id}'>Retire</button></td>`),n+="</tr>")}),n+=`</tbody>
+      <td>${r.colorName}${r.isTranslucent?"/TL":""}</td>`,r.isRetired?n+="<td style='text-align: right;' class='remaining'>&mdash;</td><td style='text-align: right;'>&mdash;</td><td style='text-align: right;'>&mdash;</td><td></td>":(n+=`
+        <td style='text-align: right;' class='left'">${r.remainingWeight}</td>
+        <td style='text-align: right;' class="net">${r.initialNetWeight}</td>
+        <td style='text-align: right;' class="gross">${r.grossWeight}</td>`,n+=`<td><button class='sb-button-primary spoolretire' data-item='retire|${r.id}'>Retire</button></td>`),n+="</tr>")}),n+=`</tbody>
   </table>
   </div>`,n}async function kt(){return`
   <button class='sb-button-primary' onclick='javascript:document.getElementById("new-spool").style["display"] = ""; this.style["display"] = "none";'>Add New Spool</button>
