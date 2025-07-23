@@ -66,7 +66,7 @@ export async function renderSpools(excludeRetired: boolean | true): Promise<stri
 
   html += "</tbody>"
 
-  html += `<tfoot><tr><td colspan='3'>${displayedSpools} Spools</td><td style='text-align: right;'>${totalRemaining}</td><td style='text-align: right;'>${totalInitial}</td><td style='text-align: right;'>&mdash;</td><td></td></tr></tfoot>`
+  html += `<tfoot><tr><td colspan='3'>${displayedSpools} Spools</td><td style='text-align: right;'>${totalRemaining}</td><td style='text-align: right;'>${totalInitial}</td><td style='text-align: right;'></td><td></td></tr></tfoot>`
 
   html += "</table></div>";
 
@@ -114,6 +114,10 @@ export async function renderPrintJobs(excludeRetired: boolean | true): Promise<s
       <input type='hidden' id='newprintjobdata' value='test-data' />
     </td></tr>`;
 
+  let totalJobs = 0;
+  let totalWeight = 0;
+  let totalDuration = 0;
+
   jobs.forEach((j) => {
     html += `<tr>
     <td style='text-align: right;'>${new Date(j.date).toLocaleDateString()}</td>
@@ -129,16 +133,22 @@ export async function renderPrintJobs(excludeRetired: boolean | true): Promise<s
       html += "<td></td>";
     }
     else {
-      html += `
-      <td><button class='sb-button-primary' onclick='javascript:document.getElementById("printjobdate").value="${j.date.substring(0, 10)}";document.getElementById("printjobdesc").value="${j.description}";document.getElementById("printjobfilament").value="${j.spoolId}";document.getElementById("printjobweight").value="${j.filamentWeight}";document.getElementById("printjobduration").value="${j.duration}";document.getElementById("printjobnotes").value="${j.notes ? j.notes : ''}";this.parentElement.parentElement.remove();' data-item="deletejob|${j.id}">Del &amp; Redo</button></td>`;
+      html +=
+        `<td><button class='sb-button-primary' onclick='javascript:document.getElementById("printjobdate").value="${j.date.substring(0, 10)}";document.getElementById("printjobdesc").value="${j.description}";document.getElementById("printjobfilament").value="${j.spoolId}";document.getElementById("printjobweight").value="${j.filamentWeight}";document.getElementById("printjobduration").value="${j.duration}";document.getElementById("printjobnotes").value="${j.notes ? j.notes : ''}";this.parentElement.parentElement.remove();' data-item="deletejob|${j.id}">Del &amp; Redo</button></td>`;
     }
+
+    totalJobs++;
+    totalWeight += j.filamentWeight;
+    totalDuration += j.duration;
 
     html += "</tr>";
   });
 
-  html += `</tbody>
-  </table>
-  </div>`;
+  html += "</tbody><tfoot>";
+
+  html += `<tr><td colspan='5'>${totalJobs} Print Jobs</td><td style='text-align: right;'>${totalWeight}</td><td style='text-align: right;'>${prettifyDuration(totalDuration)}</td><td></td><td></td></tr>`;
+
+  html += "</tfoot></table></div>";
 
   return html;
 }
@@ -544,14 +554,13 @@ function prettifyDuration(duration: number): string {
   const hours = Math.floor(duration / 60);
   const minutes = duration % 60;
 
-  // Pad minutes with a leading zero if it's less than 10
-  const paddedMinutes = minutes < 10 ? `0${minutes}` : `${minutes}`;
-
   if (hours > 0) {
+    // Pad minutes with a leading zero if it's less than 10
+    const paddedMinutes = minutes < 10 ? `0${minutes}` : `${minutes}`;
     return `${hours}h ${paddedMinutes}m`;
   }
   else {
-    return `${paddedMinutes}m`;
+    return `${minutes}m`;
   }
 }
 
