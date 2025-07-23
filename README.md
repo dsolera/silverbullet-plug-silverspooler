@@ -13,6 +13,8 @@ This plug allows to:
 
 This plug does not record printer information and does not allow to group filament and print jobs by printer.
 
+All data is saved in YAML files that is easily portable and human-readable.
+
 ## Configuration
 
 By default, this plug stores data in the current space under the `Files/SilverSpooler/` folder.
