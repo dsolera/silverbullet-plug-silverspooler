@@ -401,7 +401,14 @@ async function getSpools(): Promise<Array<LiveSpool>> {
   if (_spools === undefined || _spools === null) {
     let sf = await getFilePath(SPOOLS_FILE);
     log("Loading spools from " + sf);
-    let spoolsData = uint8ArrayToString(await space.readDocument(sf));
+
+    let spoolsData = "";
+
+    for (const d of (await space.listDocuments())) {
+      if (d.name === sf) {
+        spoolsData = uint8ArrayToString(await space.readDocument(sf));
+      }
+    }
 
     if (hasContent(spoolsData)) {
       _spools = await yamlparse(spoolsData).spools as Array<LiveSpool>;
@@ -445,7 +452,14 @@ async function getPrintJobs(): Promise<Array<LivePrintJob>> {
   if (_printJobs === undefined || _printJobs === null) {
     let jf = await getFilePath(JOBS_FILE);
     log("Loading jobs from " + jf);
-    let jobsData = uint8ArrayToString(await space.readDocument(jf));
+
+    let jobsData = "";
+
+    for (const d of (await space.listDocuments())) {
+      if (d.name === jf) {
+        jobsData = uint8ArrayToString(await space.readDocument(jf));
+      }
+    }
 
     if (hasContent(jobsData)) {
       // No sort to preserve performance
