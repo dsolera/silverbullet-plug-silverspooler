@@ -465,7 +465,7 @@ async function saveSpools(spools: Array<LiveSpool>) {
       grossWeight: s.grossWeight,
       initialNetWeight: s.initialNetWeight,
       isRetired: s.isRetired,
-      notes: s.notes
+      notes: hasContent(s.notes) ? s.notes : ""
     } as Spool);
   }
 
@@ -552,7 +552,7 @@ async function savePrintJobs(printJobs: Array<LivePrintJob>) {
       description: j.description,
       filamentWeight: j.filamentWeight,
       duration: j.duration,
-      notes: typeof j.notes === "string" ? j.notes : ""
+      notes: hasContent(j.notes) ? j.notes : ""
     } as PrintJob);
   }
 
