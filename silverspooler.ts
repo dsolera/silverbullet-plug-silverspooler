@@ -73,7 +73,7 @@ export async function renderSpools(excludeRetired: boolean | true): Promise<stri
   return html;
 }
 
-export async function renderPrintJobs(): Promise<string> {
+export async function renderPrintJobs(excludeRetired: boolean | true): Promise<string> {
   let jobs = await getPrintJobs();
   // Sort by date desc
   jobs.sort((a, b) => { return b.date.localeCompare(a.date); });
@@ -97,7 +97,9 @@ export async function renderPrintJobs(): Promise<string> {
 
   let filamentOptions: string = "";
   for (const s of spools) {
-    filamentOptions += `<option value='${s.id}'>${s.brand} | ${s.material} | ${renderColorSimple(s.color, s.isTranslucent)}${s.isRetired ? " (Retired)" : ""}</value>`;
+    if (!s.isRetired || (s.isRetired && !excludeRetired)) {
+      filamentOptions += `<option value='${s.id}'>${s.brand} | ${s.material} | ${renderColorSimple(s.color, s.isTranslucent)}${s.isRetired ? " (Retired)" : ""}</value>`;
+    }
   }
 
   html += `<tr class='newprintjob'>
@@ -121,9 +123,17 @@ export async function renderPrintJobs(): Promise<string> {
     <td>${renderColor(j.spoolColor, j.spoolIsTranslucent)}</td>
     <td style='text-align: right;'>${j.filamentWeight}</td>
     <td style='text-align: right;'>${prettifyDuration(j.duration)}</td>
-    <td>${j.notes ? j.notes : ""}</td>
-    <td><button class='sb-button-primary' onclick='javascript:document.getElementById("printjobdate").value="${j.date.substring(0, 10)}";document.getElementById("printjobdesc").value="${j.description}";document.getElementById("printjobfilament").value="${j.spoolId}";document.getElementById("printjobweight").value="${j.filamentWeight}";document.getElementById("printjobduration").value="${j.duration}";document.getElementById("printjobnotes").value="${j.notes ? j.notes : ''}";this.parentElement.parentElement.remove();' data-item="deletejob|${j.id}">Del &amp; Redo</button></td>
-    </tr>`;
+    <td>${j.notes ? j.notes : ""}</td>`;
+
+    if (j.spoolIsRetired && excludeRetired) {
+      html += "<td></td>";
+    }
+    else {
+      html += `
+      <td><button class='sb-button-primary' onclick='javascript:document.getElementById("printjobdate").value="${j.date.substring(0, 10)}";document.getElementById("printjobdesc").value="${j.description}";document.getElementById("printjobfilament").value="${j.spoolId}";document.getElementById("printjobweight").value="${j.filamentWeight}";document.getElementById("printjobduration").value="${j.duration}";document.getElementById("printjobnotes").value="${j.notes ? j.notes : ''}";this.parentElement.parentElement.remove();' data-item="deletejob|${j.id}">Del &amp; Redo</button></td>`;
+    }
+
+    html += "</tr>";
   });
 
   html += `</tbody>
@@ -374,7 +384,8 @@ async function saveNewPrintJob(args: string) {
     spoolBrand: selectedSpool.brand,
     spoolMaterial: selectedSpool.material,
     spoolColor: selectedSpool.color,
-    spoolIsTranslucent: selectedSpool.isTranslucent
+    spoolIsTranslucent: selectedSpool.isTranslucent,
+    spoolIsRetired: selectedSpool.isRetired
   };
 
   let printJobs = await getPrintJobs();
@@ -439,7 +450,7 @@ async function getPrintJobs(): Promise<Array<LivePrintJob>> {
     if (hasContent(jobsData)) {
       // No sort to preserve performance
       _printJobs = await yamlparse(jobsData).jobs as Array<LivePrintJob>;
-      await loadSpoolNames(_printJobs);
+      await loadSpoolData(_printJobs);
     }
     else {
       _printJobs = new Array<LivePrintJob>();
@@ -466,7 +477,7 @@ async function loadRemainingWeight(spools: Array<LiveSpool>) {
   });
 }
 
-async function loadSpoolNames(jobs: Array<LivePrintJob>) {
+async function loadSpoolData(jobs: Array<LivePrintJob>) {
   let spools = await getSpools();
 
   jobs.forEach((j) => {
@@ -480,6 +491,7 @@ async function loadSpoolNames(jobs: Array<LivePrintJob>) {
         j.spoolMaterial = s.material;
         j.spoolColor = s.color;
         j.spoolIsTranslucent = s.isTranslucent;
+        j.spoolIsRetired = s.isRetired;
       }
     });
   });
@@ -502,7 +514,7 @@ async function savePrintJobs(printJobs: Array<LivePrintJob>) {
     } as PrintJob);
   }
 
-  let rawData = await yamlstringify({ spools: staticJobs });
+  let rawData = await yamlstringify({ jobs: staticJobs });
 
   await space.writeDocument(await getFilePath(JOBS_FILE), stringToUint8Array(rawData));
 }
@@ -606,5 +618,6 @@ type LivePrintJob = PrintJob & {
   spoolBrand: string;
   spoolMaterial: string;
   spoolColor: string;
-  spoolIsTranslucent: boolean
+  spoolIsTranslucent: boolean;
+  spoolIsRetired: boolean;
 }
