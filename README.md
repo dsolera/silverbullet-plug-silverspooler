@@ -20,6 +20,7 @@ By default, this plug stores data in the current space under the `Files/SilverSp
 You can change this path by adding a configuration key.
 
 ```lua
+-- Priority: 80
 config.set {
   silverSpooler = {
     -- Don't include leading slash, DO INCLUDE trailing slash
