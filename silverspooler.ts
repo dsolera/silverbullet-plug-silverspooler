@@ -35,6 +35,7 @@ export async function renderSpools(excludeRetired: boolean | true): Promise<stri
     </td></tr>`;
 
   let displayedSpools = 0;
+  let retiredSpools = 0;
   let totalInitial = 0;
   let totalRemaining = 0;
 
@@ -46,7 +47,7 @@ export async function renderSpools(excludeRetired: boolean | true): Promise<stri
       <td>${renderColor(s.color, s.isTranslucent)}</td>`;
 
       if (s.isRetired) {
-        html += "<td style='text-align: right;' class='remaining'>&mdash;</td><td style='text-align: right;'>&mdash;</td><td style='text-align: right;'>&mdash;</td><td></td>"
+        html += "<td style='text-align: right;' class='remaining'>&mdash;</td><td style='text-align: right;'>&mdash;</td><td style='text-align: right;'>&mdash;</td><td></td>";
       }
       else {
         html += `
@@ -62,11 +63,14 @@ export async function renderSpools(excludeRetired: boolean | true): Promise<stri
       totalInitial += s.initialNetWeight;
       totalRemaining += s.remainingWeight;
     }
+    else {
+      retiredSpools++;
+    }
   });
 
   html += "</tbody>"
 
-  html += `<tfoot><tr><td colspan='3'>${displayedSpools} Spools</td><td style='text-align: right;'>${totalRemaining}</td><td style='text-align: right;'>${totalInitial}</td><td style='text-align: right;'></td><td></td></tr></tfoot>`
+  html += `<tfoot><tr><td colspan='3'>${displayedSpools} Spools${retiredSpools > 0 ? " (+" + retiredSpools + " Retired)" : ""}</td><td style='text-align: right;'>${totalRemaining}</td><td style='text-align: right;'>${totalInitial}</td><td style='text-align: right;'></td><td></td></tr></tfoot>`
 
   html += "</table></div>";
 
