@@ -27,7 +27,7 @@ export async function renderSpools(excludeRetired: boolean | true): Promise<stri
     <td><input type='text' required id='spoolbrand' placeholder='Brand' style='width: 100%;' /></td>
     <td><input type='text' required id='spoolmaterial' placeholder='Material' style='width: 100%;' /></td>
     <td><input type='color' required id='spoolcolor' /><input type='checkbox' id='spooltranslucent' /> <label for='spooltranslucent' title='Translucent or transparent filament'>TL</label></td>
-    <td style='text-align: right;'>&mdash;</td>
+    <td style='text-align: right;'></td>
     <td style='text-align: right;'><input type='number' required id='spoolnetweight' style='width: 60%; text-align: right;' value='1000' /></td>
     <td style='text-align: right;'><input type='number' required id='spoolgrossweight' style='width: 60%; text-align: right;' /></td>
     <td><input type='text' id='spoolnotes' style='width: 100%;' /></td>
@@ -48,7 +48,7 @@ export async function renderSpools(excludeRetired: boolean | true): Promise<stri
       <td>${s.material}</td>
       <td>${renderColor(s.color, s.isTranslucent)}</td>`;
 
-      let notesBlock = `<td style='font-size: 0.8em;'>${s.notes ? s.notes : ""} <button class='sb-button' data-item="spoolnote|${s.id}" style="margin-left: 8px;">Edit</button></td>`;
+      let notesBlock = `<td style='font-size: 0.8em;'>${renderShortDescription(s.notes)} <button class='sb-button' data-item="spoolnote|${s.id}" style="margin-left: 8px;">Edit</button></td>`;
 
       if (s.isRetired) {
         html += `<td style='text-align: right;' class='remaining'>&mdash;</td><td style='text-align: right;'>&mdash;</td><td style='text-align: right;'>&mdash;</td>${notesBlock}<td></td>`;
@@ -130,13 +130,13 @@ export async function renderPrintJobs(excludeRetired: boolean | true): Promise<s
   jobs.forEach((j) => {
     html += `<tr>
     <td style='text-align: right;'>${new Date(j.date).toLocaleDateString()}</td>
-    <td>${j.description}</td>
+    <td style='font-size: 0.8em;'>${renderShortDescription(j.description)}</td>
     <td>${j.spoolBrand}</td>
     <td>${j.spoolMaterial}</td>
     <td>${renderColor(j.spoolColor, j.spoolIsTranslucent)}</td>
     <td style='text-align: right;'>${j.filamentWeight}</td>
     <td style='text-align: right;'>${prettifyDuration(j.duration)}</td>
-    <td style='font-size: 0.8em;'>${j.notes ? j.notes : ""}</td>`;
+    <td style='font-size: 0.8em;'>${renderShortDescription(j.notes)}</td>`;
 
     if (j.spoolIsRetired && excludeRetired) {
       html += "<td></td>";
@@ -666,6 +666,15 @@ function prettifyDuration(duration: number): string {
   else {
     return `${minutes}m`;
   }
+}
+
+function renderShortDescription(description: string): string {
+  if (!hasContent(description)) return "";
+
+  // 1 more to account for ellipsis in shortened form
+  if (description.length <= 27) return description;
+
+  return `<span title="${description}">${description.substring(0, 26)}&hellip;</span>`;
 }
 
 async function getFilePath(fileName: string): Promise<string> {
