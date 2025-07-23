@@ -49,14 +49,14 @@ export async function renderSpools(excludeRetired: boolean | true): Promise<stri
       <td>${renderColor(s.color, s.isTranslucent)}</td>`;
 
       if (s.isRetired) {
-        html += `<td style='text-align: right;' class='remaining'>&mdash;</td><td style='text-align: right;'>&mdash;</td><td style='text-align: right;'>&mdash;</td><td>${s.notes ? s.notes : ""}</td><td></td>`;
+        html += `<td style='text-align: right;' class='remaining'>&mdash;</td><td style='text-align: right;'>&mdash;</td><td style='text-align: right;'>&mdash;</td><td style='font-size: 0.8em;'>${s.notes ? s.notes : ""}</td><td></td>`;
       }
       else {
         html += `
         <td style='text-align: right;' class='left'">${s.remainingWeight}</td>
         <td style='text-align: right;' class="net">${s.initialNetWeight}</td>
         <td style='text-align: right;' class="gross">${s.grossWeight}</td>
-        <td>${s.notes ? s.notes : ""}</td>`;
+        <td style='font-size: 0.8em;'>${s.notes ? s.notes : ""}</td>`;
         html += `<td><button class='sb-button-primary spoolretire' data-item='retire|${s.id}'>Retire</button></td>`;
       }
 
@@ -134,7 +134,7 @@ export async function renderPrintJobs(excludeRetired: boolean | true): Promise<s
     <td>${renderColor(j.spoolColor, j.spoolIsTranslucent)}</td>
     <td style='text-align: right;'>${j.filamentWeight}</td>
     <td style='text-align: right;'>${prettifyDuration(j.duration)}</td>
-    <td>${j.notes ? j.notes : ""}</td>`;
+    <td style='font-size: 0.8em;'>${j.notes ? j.notes : ""}</td>`;
 
     if (j.spoolIsRetired && excludeRetired) {
       html += "<td></td>";
