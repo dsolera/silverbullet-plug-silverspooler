@@ -82,7 +82,11 @@ export async function renderSpools(excludeRetired: boolean | true): Promise<stri
   return html;
 }
 
-export async function renderPrintJobs(excludeRetired: boolean | true): Promise<string> {
+export async function renderPrintJobs(excludeRetired: boolean | true, limit: number | 1000000): Promise<string> {
+  if (limit <= 0) {
+    limit = 1000000;
+  }
+
   let jobs = await getPrintJobs();
   // Sort by date desc
   jobs.sort((a, b) => { return b.date.localeCompare(a.date); });
@@ -127,35 +131,42 @@ export async function renderPrintJobs(excludeRetired: boolean | true): Promise<s
   let totalWeight = 0;
   let totalDuration = 0;
 
-  jobs.forEach((j) => {
-    html += `<tr>
-    <td style='text-align: right;'>${new Date(j.date).toLocaleDateString()}</td>
-    <td style='font-size: 0.8em;'>${renderShortDescription(j.description)}</td>
-    <td>${j.spoolBrand}</td>
-    <td>${j.spoolMaterial}</td>
-    <td>${renderColor(j.spoolColor, j.spoolIsTranslucent)}</td>
-    <td style='text-align: right;'>${j.filamentWeight}</td>
-    <td style='text-align: right;'>${prettifyDuration(j.duration)}</td>
-    <td style='font-size: 0.8em;'>${renderShortDescription(j.notes)}</td>`;
+  let limitReached = false;
 
-    if (j.spoolIsRetired && excludeRetired) {
-      html += "<td></td>";
-    }
-    else {
-      html +=
-        `<td><button class='sb-button-primary' onclick='javascript:document.getElementById("printjobdate").value="${j.date.substring(0, 10)}";document.getElementById("printjobdesc").value="${j.description}";document.getElementById("printjobfilament").value="${j.spoolId}";document.getElementById("printjobweight").value="${j.filamentWeight}";document.getElementById("printjobduration").value="${j.duration}";document.getElementById("printjobnotes").value="${j.notes ? j.notes : ''}";this.parentElement.parentElement.remove();' data-item="deletejob|${j.id}">Del &amp; Redo</button></td>`;
+  for (const j of jobs) {
+    if (!limitReached) {
+      html += `<tr>
+        <td style='text-align: right;'>${new Date(j.date).toLocaleDateString()}</td>
+        <td style='font-size: 0.8em;'>${renderShortDescription(j.description)}</td>
+        <td>${j.spoolBrand}</td>
+        <td>${j.spoolMaterial}</td>
+        <td>${renderColor(j.spoolColor, j.spoolIsTranslucent)}</td>
+        <td style='text-align: right;'>${j.filamentWeight}</td>
+        <td style='text-align: right;'>${prettifyDuration(j.duration)}</td>
+        <td style='font-size: 0.8em;'>${renderShortDescription(j.notes)}</td>`;
+
+      if (j.spoolIsRetired && excludeRetired) {
+        html += "<td></td>";
+      }
+      else {
+        html +=
+          `<td><button class='sb-button-primary' onclick='javascript:document.getElementById("printjobdate").value="${j.date.substring(0, 10)}";document.getElementById("printjobdesc").value="${j.description}";document.getElementById("printjobfilament").value="${j.spoolId}";document.getElementById("printjobweight").value="${j.filamentWeight}";document.getElementById("printjobduration").value="${j.duration}";document.getElementById("printjobnotes").value="${j.notes ? j.notes : ''}";this.parentElement.parentElement.remove();' data-item="deletejob|${j.id}">Del &amp; Redo</button></td>`;
+      }
+      html += "</tr>";
     }
 
     totalJobs++;
     totalWeight += j.filamentWeight;
     totalDuration += j.duration;
 
-    html += "</tr>";
-  });
+    if (totalJobs >= limit) {
+      limitReached = true;
+    }
+  };
 
   html += "</tbody><tfoot>";
 
-  html += `<tr><td colspan='5'>${totalJobs} Print Jobs</td><td style='text-align: right;'>${totalWeight}</td><td style='text-align: right;'>${prettifyDuration(totalDuration)}</td><td></td><td></td></tr>`;
+  html += `<tr><td colspan='5'>${totalJobs} Print Jobs${limitReached ? " (" + (totalJobs - limit) + " not shown)" : ""}</td><td style='text-align: right;'>${totalWeight}</td><td style='text-align: right;'>${prettifyDuration(totalDuration)}</td><td></td><td></td></tr>`;
 
   html += "</tfoot></table></div>";
 
