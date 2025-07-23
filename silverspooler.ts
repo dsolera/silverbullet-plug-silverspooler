@@ -408,8 +408,8 @@ async function saveNewPrintJob(args: string) {
     editor.flashNotification("Please specify a print job weight between 1 and 10000.");
     return;
   }
-  if (jobDuration <= 0 || jobDuration > 1000) {
-    editor.flashNotification("Please specify a print job duration between 1 and 1000.");
+  if (jobDuration < 0 || jobDuration > 1000) {
+    editor.flashNotification("Please specify a print job duration between 0 and 1000.");
     return;
   }
 
