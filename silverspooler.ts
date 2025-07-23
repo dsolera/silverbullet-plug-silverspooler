@@ -198,6 +198,7 @@ export async function refresh() {
   _config = null;
   _spools = null;
   _printJobs = null;
+  _justDeletedPrintJob = undefined;
   await refreshInternal("SilverSpooler data refreshed.");
 }
 
