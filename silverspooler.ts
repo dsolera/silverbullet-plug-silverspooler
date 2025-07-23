@@ -26,8 +26,7 @@ export async function renderSpools(excludeRetired: boolean | true): Promise<stri
   html += `<tr class='newspool'>
     <td><input type='text' required id='spoolbrand' placeholder='Brand' style='width: 100%;' /></td>
     <td><input type='text' required id='spoolmaterial' placeholder='Material' style='width: 100%;' /></td>
-    <td><input type='color' required id='spoolcolor' /><input type='checkbox' id='spooltranslucent' /> <label for='spooltranslucent' title='Translucent or transparent filament'>TL</label></td>
-    <td style='text-align: right;'></td>
+    <td colspan='2'><input type='color' required id='spoolcolor' style='width: 50px;' /><input type='checkbox' id='spooltranslucent' /> <label for='spooltranslucent' title='Translucent or transparent filament'>TL</label></td>
     <td style='text-align: right;'><input type='number' required id='spoolnetweight' style='width: 60%; text-align: right;' value='1000' /></td>
     <td style='text-align: right;'><input type='number' required id='spoolgrossweight' style='width: 60%; text-align: right;' /></td>
     <td><input type='text' id='spoolnotes' style='width: 100%;' /></td>
@@ -138,7 +137,7 @@ export async function renderPrintJobs(excludeRetired: boolean | true, limit: num
       html += `<tr>
         <td style='text-align: right;'>${new Date(j.date).toLocaleDateString()}</td>
         <td style='font-size: 0.8em;'>${renderShortDescription(j.description)}</td>
-        <td>${j.spoolBrand} ${j.spoolMaterial}</td>
+        <td>${j.spoolBrand} | ${j.spoolMaterial}</td>
         <td style="font-size: 0.8em;">${renderColor(j.spoolColor, j.spoolIsTranslucent)}</td>
         <td style='text-align: right;'>${j.filamentWeight}</td>
         <td style='text-align: right;'>${prettifyDuration(j.duration)}</td>
@@ -178,13 +177,13 @@ function renderColor(color: string, isTranslucent: boolean) {
   let result = "";
 
   if (isTranslucent) {
-    result = `<span title='${color}/TL'><span style="background-color: ${color}; color: ${color};">&nbsp;|||&nbsp;</span><span style="background-color: ${rgba};">&nbsp;<span style="color: white;">|</span><span style='color: lightgrey;'>|</span><span style="color: black;">|</span>&nbsp;</span></span>`;
+    result = `<span title='${color}/TL'><span style="background-color: ${color}; color: ${color};">&nbsp;|||&nbsp;</span><span style="background-color: transparent;">&nbsp;|||&nbsp;</span></span>`;
   }
   else {
     result = `<span title='${color}'><span style="background-color: ${color}; color: ${color};">&nbsp;|||&nbsp;</span><span style="background-color: ${color}; color: ${color};">&nbsp;|||&nbsp;</span></span>`;
   }
 
-  return result + (isTranslucent ? " TL" : "");
+  return result;
 }
 function renderColorSimple(color: string, isTranslucent: boolean) {
   return color + (isTranslucent ? "/TL" : "");
