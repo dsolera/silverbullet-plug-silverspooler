@@ -57,7 +57,7 @@ export async function renderSpools(excludeRetired: boolean | true): Promise<stri
         html += `
         <td style='text-align: right;' class="left">${s.remainingWeight}</td>
         <td style='text-align: right;' class="net"><button class="sb-button" data-item="spoolremaining|${s.id}" title="Modify the initial weight" style="font-size: 0.72em; margin-right: 8px;">Edit</button> ${s.initialNetWeight}</td>
-        <td style='text-align: right;' class="gross">${s.grossWeight}</td>
+        <td style='text-align: right;' class="gross"><button class="sb-button" data-item="spoolgross|${s.id}" title="Modify the gross weight" style="font-size: 0.72em; margin-right: 8px;">Edit</button> ${s.grossWeight}</td>
         ${notesBlock}`;
         html += `<td><button class='sb-button-primary spoolretire' data-item='retire|${s.id}'>Retire</button></td>`;
       }
@@ -202,6 +202,9 @@ export async function click(dataItem: string, args: string) {
   }
   else if (dataItem.startsWith("spoolremaining|")) {
     await editSpoolInitialWeight(dataItem.substring(15));
+  }
+  else if (dataItem.startsWith("spoolgross|")) {
+    await editSpoolGrossWeight(dataItem.substring(11));
   }
   else {
     log("Invalid click data.");
@@ -476,6 +479,36 @@ async function editSpoolInitialWeight(spoolId: string) {
     mySpool.initialNetWeight = newWeight;
     await saveSpools(spools);
     await refreshInternal("Initial spool weight saved.");
+  }
+}
+
+async function editSpoolGrossWeight(spoolId: string) {
+  let spools = await getSpools();
+
+  let mySpool = spools.find(s => s.id === spoolId);
+
+  if (typeof mySpool === "undefined") {
+    log("Spool not found.");
+    return;
+  }
+
+  let newWeightString = await editor.prompt("Modify gross spool weight:", mySpool.grossWeight.toString());
+
+  if (typeof newWeightString === "undefined") {
+    return;
+  }
+
+  let newWeight = Number(newWeightString);
+
+  if (isNaN(newWeight) || newWeight <= 0 || newWeight > 10000) {
+    editor.flashNotification("Please specify a gross spool weight between 1 and 10000.");
+    return;
+  }
+
+  if (newWeight !== mySpool.grossWeight) {
+    mySpool.grossWeight = newWeight;
+    await saveSpools(spools);
+    await refreshInternal("Gross spool weight saved.");
   }
 }
 

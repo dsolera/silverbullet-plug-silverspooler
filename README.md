@@ -6,6 +6,7 @@ A simple Plug for SilverBullet allowing to manage 3D printing spool stock and pr
 This plug allows to:
 
 * Create new spools with brand, material, color, initial net weight and gross weight
+* Edit some spool info
 * Retire used-up spools
 * Record print jobs with date, description, spool, used filament weight, duration, and additional notes
 * Delete print jobs
