@@ -17,6 +17,7 @@ export async function renderSpools(excludeRetired: boolean | true): Promise<stri
       <td style='text-align: right;'>Left</td>
       <td style='text-align: right;'>Initial</td>
       <td style='text-align: right;'>Gross</td>
+      <td>Notes</td>
       <td style='text-align: center;'></td>
     </tr>
   </thead>
@@ -29,8 +30,9 @@ export async function renderSpools(excludeRetired: boolean | true): Promise<stri
     <td style='text-align: right;'>&mdash;</td>
     <td style='text-align: right;'><input type='number' required id='spoolnetweight' style='width: 60%; text-align: right;' value='1000' /></td>
     <td style='text-align: right;'><input type='number' required id='spoolgrossweight' style='width: 60%; text-align: right;' /></td>
+    <td><input type='text' id='spoolnotes' style='width: 100%;' /></td>
     <td>
-      <button class="sb-button-primary" data-item="newspool" onclick='javascript:document.getElementById("newspooldata").value ="br="+encodeURIComponent(document.getElementById("spoolbrand").value)+"&mt="+encodeURIComponent(document.getElementById("spoolmaterial").value)+"&cl="+encodeURIComponent(document.getElementById("spoolcolor").value)+"&tl="+encodeURIComponent(document.getElementById("spooltranslucent").checked)+"&nw="+encodeURIComponent(document.getElementById("spoolnetweight").value)+"&gw="+encodeURIComponent(document.getElementById("spoolgrossweight").value);'>Add</button>
+      <button class="sb-button-primary" data-item="newspool" onclick='javascript:document.getElementById("newspooldata").value ="br="+encodeURIComponent(document.getElementById("spoolbrand").value)+"&mt="+encodeURIComponent(document.getElementById("spoolmaterial").value)+"&cl="+encodeURIComponent(document.getElementById("spoolcolor").value)+"&tl="+encodeURIComponent(document.getElementById("spooltranslucent").checked)+"&nw="+encodeURIComponent(document.getElementById("spoolnetweight").value)+"&gw="+encodeURIComponent(document.getElementById("spoolgrossweight").value)+"&nt="+encodeURIComponent(document.getElementById("spoolnotes").value);'>Add</button>
       <input type='hidden' id='newspooldata' value='test-data' />
     </td></tr>`;
 
@@ -47,13 +49,14 @@ export async function renderSpools(excludeRetired: boolean | true): Promise<stri
       <td>${renderColor(s.color, s.isTranslucent)}</td>`;
 
       if (s.isRetired) {
-        html += "<td style='text-align: right;' class='remaining'>&mdash;</td><td style='text-align: right;'>&mdash;</td><td style='text-align: right;'>&mdash;</td><td></td>";
+        html += `<td style='text-align: right;' class='remaining'>&mdash;</td><td style='text-align: right;'>&mdash;</td><td style='text-align: right;'>&mdash;</td><td>${s.notes ? s.notes : ""}</td><td></td>`;
       }
       else {
         html += `
         <td style='text-align: right;' class='left'">${s.remainingWeight}</td>
         <td style='text-align: right;' class="net">${s.initialNetWeight}</td>
-        <td style='text-align: right;' class="gross">${s.grossWeight}</td>`;
+        <td style='text-align: right;' class="gross">${s.grossWeight}</td>
+        <td>${s.notes ? s.notes : ""}</td>`;
         html += `<td><button class='sb-button-primary spoolretire' data-item='retire|${s.id}'>Retire</button></td>`;
       }
 
@@ -70,7 +73,7 @@ export async function renderSpools(excludeRetired: boolean | true): Promise<stri
 
   html += "</tbody>"
 
-  html += `<tfoot><tr><td colspan='3'>${displayedSpools} Spools${retiredSpools > 0 ? " (+" + retiredSpools + " Retired)" : ""}</td><td style='text-align: right;'>${totalRemaining}</td><td style='text-align: right;'>${totalInitial}</td><td style='text-align: right;'></td><td></td></tr></tfoot>`
+  html += `<tfoot><tr><td colspan='3'>${displayedSpools} Spools${retiredSpools > 0 ? " (+" + retiredSpools + " Retired)" : ""}</td><td style='text-align: right;'>${totalRemaining}</td><td style='text-align: right;'>${totalInitial}</td><td style='text-align: right;'></td><td></td><td></td></tr></tfoot>`
 
   html += "</table></div>";
 
@@ -112,7 +115,7 @@ export async function renderPrintJobs(excludeRetired: boolean | true): Promise<s
     <td colspan='3'><select id='printjobfilament' value="${typeof _justDeletedPrintJob !== "undefined" ? _justDeletedPrintJob?.spoolId : ""}">${filamentOptions}</select></td>
     <td style='text-align: right;'><input type='number' required id='printjobweight' style='width: 60%; text-align: right;' value="${typeof _justDeletedPrintJob !== "undefined" ? _justDeletedPrintJob?.filamentWeight : ""}" /></td>
     <td style='text-align: right;'><input type='number' required id='printjobduration' style='width: 60%; text-align: right;' value="${typeof _justDeletedPrintJob !== "undefined" ? _justDeletedPrintJob?.duration : ""}" /></td>
-    <td><input type='text' required id='printjobnotes' style='width: 100%;' value="${typeof _justDeletedPrintJob !== "undefined" ? _justDeletedPrintJob?.notes : ""}" /></td>
+    <td><input type='text' id='printjobnotes' style='width: 100%;' value="${typeof _justDeletedPrintJob !== "undefined" ? _justDeletedPrintJob?.notes : ""}" /></td>
     <td>
       <button class="sb-button-primary" data-item="newprintjob" onclick='javascript:document.getElementById("newprintjobdata").value ="dt="+encodeURIComponent(document.getElementById("printjobdate").value)+"&ds="+encodeURIComponent(document.getElementById("printjobdesc").value)+"&fl="+encodeURIComponent(document.getElementById("printjobfilament").value)+"&wg="+encodeURIComponent(document.getElementById("printjobweight").value)+"&dr="+encodeURIComponent(document.getElementById("printjobduration").value)+"&nt="+encodeURIComponent(document.getElementById("printjobnotes").value);'>Add</button>
       <input type='hidden' id='newprintjobdata' value='test-data' />
@@ -239,6 +242,7 @@ async function saveNewSpool(args: string) {
   let spoolTranslucent: boolean = false;
   let spoolNetWeight: number = 0;
   let spoolGrossWeight: number = 0;
+  let spoolNotes = "";
 
   for (const p of pairs) {
     let tuple = p.split('=');
@@ -262,6 +266,9 @@ async function saveNewSpool(args: string) {
     }
     else if (tuple[0] == "gw") {
       spoolGrossWeight = Number(tuple[1]);
+    }
+    else if (tuple[0] == "nt") {
+      spoolNotes = tuple[1];
     }
   }
 
@@ -304,6 +311,7 @@ async function saveNewSpool(args: string) {
     initialNetWeight: spoolNetWeight,
     grossWeight: spoolGrossWeight,
     isRetired: false,
+    notes: spoolNotes,
     remainingWeight: spoolNetWeight
   };
 
@@ -456,7 +464,8 @@ async function saveSpools(spools: Array<LiveSpool>) {
       isTranslucent: s.isTranslucent,
       grossWeight: s.grossWeight,
       initialNetWeight: s.initialNetWeight,
-      isRetired: s.isRetired
+      isRetired: s.isRetired,
+      notes: s.notes
     } as Spool);
   }
 
@@ -633,6 +642,7 @@ type Spool = {
   grossWeight: number;
   initialNetWeight: number;
   isRetired: boolean;
+  notes: string;
 };
 
 type LiveSpool = Spool & {
