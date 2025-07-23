@@ -48,15 +48,17 @@ export async function renderSpools(excludeRetired: boolean | true): Promise<stri
       <td>${s.material}</td>
       <td>${renderColor(s.color, s.isTranslucent)}</td>`;
 
+      let notesBlock = `<td style='font-size: 0.8em;'>${s.notes ? s.notes : ""} <button class='sb-button' data-item="spoolnote|${s.id}">Edit</button></td>`;
+
       if (s.isRetired) {
-        html += `<td style='text-align: right;' class='remaining'>&mdash;</td><td style='text-align: right;'>&mdash;</td><td style='text-align: right;'>&mdash;</td><td style='font-size: 0.8em;'>${s.notes ? s.notes : ""}</td><td></td>`;
+        html += `<td style='text-align: right;' class='remaining'>&mdash;</td><td style='text-align: right;'>&mdash;</td><td style='text-align: right;'>&mdash;</td>${notesBlock}<td></td>`;
       }
       else {
         html += `
         <td style='text-align: right;' class='left'">${s.remainingWeight}</td>
         <td style='text-align: right;' class="net">${s.initialNetWeight}</td>
         <td style='text-align: right;' class="gross">${s.grossWeight}</td>
-        <td style='font-size: 0.8em;'>${s.notes ? s.notes : ""} <button class='sb-button' data-item="spoolnote|${s.id}">Edit</button></td>`;
+        ${notesBlock}`;
         html += `<td><button class='sb-button-primary spoolretire' data-item='retire|${s.id}'>Retire</button></td>`;
       }
 

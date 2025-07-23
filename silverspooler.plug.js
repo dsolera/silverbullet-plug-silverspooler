@@ -49,14 +49,14 @@ ${" ".repeat(e*t)}`}function se(e){return 32<=e&&e<=126||161<=e&&e<=55295&&e!==8
     <td>
       <button class="sb-button-primary" data-item="newspool" onclick='javascript:document.getElementById("newspooldata").value ="br="+encodeURIComponent(document.getElementById("spoolbrand").value)+"&mt="+encodeURIComponent(document.getElementById("spoolmaterial").value)+"&cl="+encodeURIComponent(document.getElementById("spoolcolor").value)+"&tl="+encodeURIComponent(document.getElementById("spooltranslucent").checked)+"&nw="+encodeURIComponent(document.getElementById("spoolnetweight").value)+"&gw="+encodeURIComponent(document.getElementById("spoolgrossweight").value)+"&nt="+encodeURIComponent(document.getElementById("spoolnotes").value);'>Add</button>
       <input type='hidden' id='newspooldata' value='test-data' />
-    </td></tr>`;let i=0,r=0,o=0,a=0;return t.forEach(l=>{!e||e&&!l.isRetired?(n+=`<tr class='${l.isRetired?"retired":"active"}'>
+    </td></tr>`;let i=0,r=0,o=0,a=0;return t.forEach(l=>{if(!e||e&&!l.isRetired){n+=`<tr class='${l.isRetired?"retired":"active"}'>
       <td>${l.brand}</td>
       <td>${l.material}</td>
-      <td>${Ct(l.color,l.isTranslucent)}</td>`,l.isRetired?n+=`<td style='text-align: right;' class='remaining'>&mdash;</td><td style='text-align: right;'>&mdash;</td><td style='text-align: right;'>&mdash;</td><td style='font-size: 0.8em;'>${l.notes?l.notes:""}</td><td></td>`:(n+=`
+      <td>${Ct(l.color,l.isTranslucent)}</td>`;let s=`<td style='font-size: 0.8em;'>${l.notes?l.notes:""} <button class='sb-button' data-item="spoolnote|${l.id}">Edit</button></td>`;l.isRetired?n+=`<td style='text-align: right;' class='remaining'>&mdash;</td><td style='text-align: right;'>&mdash;</td><td style='text-align: right;'>&mdash;</td>${s}<td></td>`:(n+=`
         <td style='text-align: right;' class='left'">${l.remainingWeight}</td>
         <td style='text-align: right;' class="net">${l.initialNetWeight}</td>
         <td style='text-align: right;' class="gross">${l.grossWeight}</td>
-        <td style='font-size: 0.8em;'>${l.notes?l.notes:""} <button class='sb-button' data-item="spoolnote|${l.id}">Edit</button></td>`,n+=`<td><button class='sb-button-primary spoolretire' data-item='retire|${l.id}'>Retire</button></td>`),n+="</tr>",i++,o+=l.initialNetWeight,a+=l.remainingWeight):r++}),n+="</tbody>",n+=`<tfoot><tr><td colspan='3'>${i} Spools${r>0?" (+"+r+" Retired)":""}</td><td style='text-align: right;'>${a}</td><td style='text-align: right;'>${o}</td><td style='text-align: right;'></td><td></td><td></td></tr></tfoot>`,n+="</table></div>",n}async function At(e){let t=await le();t.sort((s,p)=>p.date.localeCompare(s.date));let n=await L(),i=`<div class='silverspooler printjobs'>
+        ${s}`,n+=`<td><button class='sb-button-primary spoolretire' data-item='retire|${l.id}'>Retire</button></td>`),n+="</tr>",i++,o+=l.initialNetWeight,a+=l.remainingWeight}else r++}),n+="</tbody>",n+=`<tfoot><tr><td colspan='3'>${i} Spools${r>0?" (+"+r+" Retired)":""}</td><td style='text-align: right;'>${a}</td><td style='text-align: right;'>${o}</td><td style='text-align: right;'></td><td></td><td></td></tr></tfoot>`,n+="</table></div>",n}async function At(e){let t=await le();t.sort((s,p)=>p.date.localeCompare(s.date));let n=await L(),i=`<div class='silverspooler printjobs'>
   <table>
   <thead>
     <tr>
