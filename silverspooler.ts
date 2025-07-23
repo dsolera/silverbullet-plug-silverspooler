@@ -56,7 +56,7 @@ export async function renderSpools(excludeRetired: boolean | true): Promise<stri
         <td style='text-align: right;' class='left'">${s.remainingWeight}</td>
         <td style='text-align: right;' class="net">${s.initialNetWeight}</td>
         <td style='text-align: right;' class="gross">${s.grossWeight}</td>
-        <td style='font-size: 0.8em;'>${s.notes ? s.notes : ""}</td>`;
+        <td style='font-size: 0.8em;'>${s.notes ? s.notes : ""} <button class='sb-button' data-item="spoolnote|${s.id}">Edit</button></td>`;
         html += `<td><button class='sb-button-primary spoolretire' data-item='retire|${s.id}'>Retire</button></td>`;
       }
 
@@ -195,6 +195,9 @@ export async function click(dataItem: string, args: string) {
   else if (dataItem == "newprintjob") {
     await saveNewPrintJob(args);
   }
+  else if (dataItem.startsWith("spoolnote|")) {
+    await editSpoolNote(dataItem.substring(10));
+  }
   else {
     log("Invalid click data.");
   }
@@ -246,7 +249,7 @@ async function saveNewSpool(args: string) {
 
   for (const p of pairs) {
     let tuple = p.split('=');
-    tuple[1] = decodeURIComponent(tuple[1]);
+    tuple[1] = sanitize(decodeURIComponent(tuple[1]));
 
     if (tuple[0] == "br") {
       spoolBrand = tuple[1];
@@ -352,7 +355,7 @@ async function saveNewPrintJob(args: string) {
 
   for (const p of pairs) {
     let tuple = p.split('=');
-    tuple[1] = decodeURIComponent(tuple[1]);
+    tuple[1] = sanitize(decodeURIComponent(tuple[1]));
 
     if (tuple[0] == "dt") {
       jobDate = tuple[1];
@@ -420,6 +423,25 @@ async function saveNewPrintJob(args: string) {
   await savePrintJobs(printJobs);
   _justDeletedPrintJob = undefined;
   await refreshInternal("New print job saved.");
+}
+
+async function editSpoolNote(spoolId: string) {
+  let spools = await getSpools();
+
+  let mySpool = spools.find(s => s.id === spoolId);
+
+  if (typeof mySpool === "undefined") {
+    log("Spool not found.");
+    return;
+  }
+
+  let newNote = sanitize(await editor.prompt("Spool notes:", mySpool.notes));
+
+  if (newNote !== mySpool.notes) {
+    mySpool.notes = newNote;
+    await saveSpools(spools);
+    await refreshInternal("Spool notes saved.");
+  }
 }
 
 var _spools: Array<LiveSpool> | null;
@@ -616,6 +638,19 @@ function hasContent(data: string): boolean {
   else {
     return false;
   }
+}
+
+function sanitize(string) {
+  const map = {
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    "'": '&#x27;',
+    "/": '&#x2F;',
+  };
+  const reg = /[&<>"'/]/ig;
+  return string.replace(reg, (match) => (map[match]));
 }
 
 function newUUID(): string {
