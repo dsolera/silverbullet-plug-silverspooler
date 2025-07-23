@@ -99,7 +99,7 @@ export async function renderPrintJobs(excludeRetired: boolean | true, limit: num
     <tr>
       <td style='text-align: right;'>Date</td>
       <td>Description</td>
-      <td colspan='3'>Spool</td>
+      <td colspan='2'>Spool</td>
       <td style='text-align: right;'>Weight</td>
       <td style='text-align: right;'>Duration</td>
       <td>Notes</td>
@@ -118,7 +118,7 @@ export async function renderPrintJobs(excludeRetired: boolean | true, limit: num
   html += `<tr class='newprintjob'>
     <td><input type='date' required id='printjobdate' style='width: 100%;' value="${typeof _justDeletedPrintJob !== "undefined" ? _justDeletedPrintJob?.date : ""}" /></td>
     <td><input type='text' required id='printjobdesc' placeholder='Description' style='width: 100%;' value="${typeof _justDeletedPrintJob !== "undefined" ? _justDeletedPrintJob?.description : ""}" /></td>
-    <td colspan='3'><select id='printjobfilament' value="${typeof _justDeletedPrintJob !== "undefined" ? _justDeletedPrintJob?.spoolId : ""}">${filamentOptions}</select></td>
+    <td colspan='2'><select id='printjobfilament' value="${typeof _justDeletedPrintJob !== "undefined" ? _justDeletedPrintJob?.spoolId : ""}">${filamentOptions}</select></td>
     <td style='text-align: right;'><input type='number' required id='printjobweight' style='width: 60%; text-align: right;' value="${typeof _justDeletedPrintJob !== "undefined" ? _justDeletedPrintJob?.filamentWeight : ""}" /></td>
     <td style='text-align: right;'><input type='number' required id='printjobduration' style='width: 60%; text-align: right;' value="${typeof _justDeletedPrintJob !== "undefined" ? _justDeletedPrintJob?.duration : ""}" title="Please enter a duration in minutes." /></td>
     <td><input type='text' id='printjobnotes' style='width: 100%;' value="${typeof _justDeletedPrintJob !== "undefined" ? _justDeletedPrintJob?.notes : ""}" /></td>
@@ -138,9 +138,8 @@ export async function renderPrintJobs(excludeRetired: boolean | true, limit: num
       html += `<tr>
         <td style='text-align: right;'>${new Date(j.date).toLocaleDateString()}</td>
         <td style='font-size: 0.8em;'>${renderShortDescription(j.description)}</td>
-        <td>${j.spoolBrand}</td>
-        <td>${j.spoolMaterial}</td>
-        <td>${renderColor(j.spoolColor, j.spoolIsTranslucent)}</td>
+        <td>${j.spoolBrand} ${j.spoolMaterial}</td>
+        <td style="font-size: 0.8em;">${renderColor(j.spoolColor, j.spoolIsTranslucent)}</td>
         <td style='text-align: right;'>${j.filamentWeight}</td>
         <td style='text-align: right;'>${prettifyDuration(j.duration)}</td>
         <td style='font-size: 0.8em;'>${renderShortDescription(j.notes)}</td>`;
@@ -150,7 +149,7 @@ export async function renderPrintJobs(excludeRetired: boolean | true, limit: num
       }
       else {
         html +=
-          `<td><button class='sb-button-primary' onclick='javascript:document.getElementById("printjobdate").value="${j.date.substring(0, 10)}";document.getElementById("printjobdesc").value="${j.description}";document.getElementById("printjobfilament").value="${j.spoolId}";document.getElementById("printjobweight").value="${j.filamentWeight}";document.getElementById("printjobduration").value="${j.duration}";document.getElementById("printjobnotes").value="${j.notes ? j.notes : ''}";this.parentElement.parentElement.remove();' data-item="deletejob|${j.id}">Del &amp; Redo</button></td>`;
+          `<td><button class='sb-button-primary' onclick='javascript:document.getElementById("printjobdate").value="${j.date.substring(0, 10)}";document.getElementById("printjobdesc").value="${j.description}";document.getElementById("printjobfilament").value="${j.spoolId}";document.getElementById("printjobweight").value="${j.filamentWeight}";document.getElementById("printjobduration").value="${j.duration}";document.getElementById("printjobnotes").value="${j.notes ? j.notes : ''}";this.parentElement.parentElement.remove();' data-item="deletejob|${j.id}" title="Delete this print job and add it again">Delete</button></td>`;
       }
       html += "</tr>";
     }
@@ -166,7 +165,7 @@ export async function renderPrintJobs(excludeRetired: boolean | true, limit: num
 
   html += "</tbody><tfoot>";
 
-  html += `<tr><td colspan='5'>${totalJobs} Print Jobs${limitReached ? " (" + (totalJobs - limit) + " not shown)" : ""}</td><td style='text-align: right;'>${totalWeight}</td><td style='text-align: right;'>${prettifyDuration(totalDuration)}</td><td></td><td></td></tr>`;
+  html += `<tr><td colspan='4'>${totalJobs} Print Jobs${limitReached ? " (" + (totalJobs - limit) + " not shown)" : ""}</td><td style='text-align: right;'>${totalWeight}</td><td style='text-align: right;'>${prettifyDuration(totalDuration)}</td><td></td><td></td></tr>`;
 
   html += "</tfoot></table></div>";
 
@@ -179,13 +178,13 @@ function renderColor(color: string, isTranslucent: boolean) {
   let result = "";
 
   if (isTranslucent) {
-    result = `<span title='${color}/TL'><span style="background-color: ${color}; color: ${color};">&nbsp;&bull;&bull;&bull;&nbsp;</span><span style="background-color: ${rgba};">&nbsp;<span style="color: white;">&bull;</span><span style='color: lightgrey;'>&bull;</span><span style="color: black;">&bull;</span>&nbsp;</span></span>`;
+    result = `<span title='${color}/TL'><span style="background-color: ${color}; color: ${color};">&nbsp;|||&nbsp;</span><span style="background-color: ${rgba};">&nbsp;<span style="color: white;">|</span><span style='color: lightgrey;'>|</span><span style="color: black;">|</span>&nbsp;</span></span>`;
   }
   else {
-    result = `<span title='${color}'><span style="background-color: ${color}; color: ${color};">&nbsp;&bull;&bull;&bull;&nbsp;</span><span style="background-color: ${color}; color: ${color};">&nbsp;&bull;&bull;&bull;&nbsp;</span></span>`;
+    result = `<span title='${color}'><span style="background-color: ${color}; color: ${color};">&nbsp;|||&nbsp;</span><span style="background-color: ${color}; color: ${color};">&nbsp;|||&nbsp;</span></span>`;
   }
 
-  return result + " <span style='font-size: 0.8em;'>" + renderColorSimple(color, isTranslucent) + "</span>";
+  return result + (isTranslucent ? " TL" : "");
 }
 function renderColorSimple(color: string, isTranslucent: boolean) {
   return color + (isTranslucent ? "/TL" : "");
