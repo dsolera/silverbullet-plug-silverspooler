@@ -65,6 +65,14 @@ In the `invokeFunction` call, you can optionally specify a `boolean` to hide ret
 
 Please note that hiding retired spools forbids the deletion of the print jobs that have used them.
 
+### Data Refresh
+
+If you modify the files outside SilverBullet, after letting SB sync the new files you can invoke the `SilverSearch: Refresh` command to reload all the data. You can also create a button using another Lua Expression.
+
+```lua
+${ widget.html(dom.button { onclick = function() editor.invokeCommand("SilverSpooler: Refresh") end, "Refresh Data" }) }
+```
+
 ## Installation
 
 If you would like to install this plug straight from Github, make sure you have the `.js` file committed to the repo and simply add this URL to the list of plugs in your `CONFIG` file, run `Plugs: Update` command and off you go!
