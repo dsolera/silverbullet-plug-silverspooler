@@ -27,8 +27,8 @@ export async function renderSpools(excludeRetired: boolean | true): Promise<stri
     <td><input type='text' required id='spoolmaterial' placeholder='New Material' style='width: 100%;' /></td>
     <td><input type='color' required id='spoolcolor' /><input type='checkbox' id='spooltranslucent' /> <label for='spooltranslucent' title='Translucent or transparent filament'>TL</label></td>
     <td style='text-align: right;'>&mdash;</td>
-    <td style='text-align: right;'><input type='number' required id='spoolnetweight' style='width: 60%;' /></td>
-    <td style='text-align: right;'><input type='number' required id='spoolgrossweight' style='width: 60%;' /></td>
+    <td style='text-align: right;'><input type='number' required id='spoolnetweight' style='width: 60%; text-align: right;' value='1000' /></td>
+    <td style='text-align: right;'><input type='number' required id='spoolgrossweight' style='width: 60%; text-align: right;' /></td>
     <td>
       <button class="sb-button-primary" data-item="newspool" onclick='javascript:document.getElementById("newspooldata").value ="br="+encodeURIComponent(document.getElementById("spoolbrand").value)+"&mt="+encodeURIComponent(document.getElementById("spoolmaterial").value)+"&cl="+encodeURIComponent(document.getElementById("spoolcolor").value)+"&tl="+encodeURIComponent(document.getElementById("spooltranslucent").checked)+"&nw="+encodeURIComponent(document.getElementById("spoolnetweight").value)+"&gw="+encodeURIComponent(document.getElementById("spoolgrossweight").value);'>Add</button>
       <input type='hidden' id='newspooldata' value='test-data' />
@@ -75,6 +75,10 @@ export async function renderSpools(excludeRetired: boolean | true): Promise<stri
 
 export async function renderPrintJobs(): Promise<string> {
   let jobs = await getPrintJobs();
+  // Sort by date desc
+  jobs.sort((a, b) => { return b.date.localeCompare(a.date); });
+
+  let spools = await getSpools();
 
   let html = `<div class='silverspooler printjobs'>
   <table>
@@ -91,6 +95,23 @@ export async function renderPrintJobs(): Promise<string> {
   </thead>
   <tbody>`;
 
+  let filamentOptions: string = "";
+  for (const s of spools) {
+    filamentOptions += `<option value='${s.id}'>${s.brand} | ${s.material} | ${renderColorSimple(s.color, s.isTranslucent)}${s.isRetired ? " (Retired)" : ""}</value>`;
+  }
+
+  html += `<tr class='newprintjob'>
+    <td><input type='date' required id='printjobdate' style='width: 100%;' /></td>
+    <td><input type='text' required id='printjobdesc' placeholder='Job Description' style='width: 100%;' /></td>
+    <td colspan='3'><select id='printjobfilament'>${filamentOptions}</select></td>
+    <td style='text-align: right;'><input type='number' required id='printjobweight' style='width: 60%; text-align: right;' /></td>
+    <td style='text-align: right;'><input type='number' required id='printjobduration' style='width: 60%; text-align: right;' /></td>
+    <td><input type='text' required id='printjobnotes' style='width: 100%;' /></td>
+    <td>
+      <button class="sb-button-primary" data-item="newprintjob" onclick='javascript:document.getElementById("newprintjobdata").value ="dt="+encodeURIComponent(document.getElementById("printjobdate").value)+"&ds="+encodeURIComponent(document.getElementById("printjobdesc").value)+"&fl="+encodeURIComponent(document.getElementById("printjobfilament").value)+"&wg="+encodeURIComponent(document.getElementById("printjobweight").value)+"&dr="+encodeURIComponent(document.getElementById("printjobduration").value)+"&nt="+encodeURIComponent(document.getElementById("printjobnotes").value);'>Add</button>
+      <input type='hidden' id='newprintjobdata' value='test-data' />
+    </td></tr>`;
+
   jobs.forEach((j) => {
     html += `<tr>
     <td style='text-align: right;'>${new Date(j.date).toLocaleDateString()}</td>
@@ -101,7 +122,7 @@ export async function renderPrintJobs(): Promise<string> {
     <td style='text-align: right;'>${j.filamentWeight}</td>
     <td style='text-align: right;'>${prettifyDuration(j.duration)}</td>
     <td>${j.notes ? j.notes : ""}</td>
-    <td>TODO</td>
+    <td><button class='sb-button-primary' onclick='javascript:document.getElementById("printjobdate").value="${j.date.substring(0, 10)}";document.getElementById("printjobdesc").value="${j.description}";document.getElementById("printjobfilament").value="${j.spoolId}";document.getElementById("printjobweight").value="${j.filamentWeight}";document.getElementById("printjobduration").value="${j.duration}";document.getElementById("printjobnotes").value="${j.notes ? j.notes : ''}";this.parentElement.parentElement.remove();' data-item="deletejob|${j.id}">Del &amp; Redo</button></td>
     </tr>`;
   });
 
@@ -115,12 +136,19 @@ export async function renderPrintJobs(): Promise<string> {
 function renderColor(color: string, isTranslucent: boolean) {
   let rgba = color + (isTranslucent ? "55" : "FF");
 
+  let result = "";
+
   if (isTranslucent) {
-    return `<span title='${color}/TL'><span style="background-color: ${color}; color: ${color};">&nbsp;&bull;&bull;&bull;&nbsp;</span><span style="background-color: ${rgba};">&nbsp;<span style="color: white;">&bull;</span><span style='color: lightgrey;'>&bull;</span><span style="color: black;">&bull;</span>&nbsp;</span></span>`;
+    result = `<span title='${color}/TL'><span style="background-color: ${color}; color: ${color};">&nbsp;&bull;&bull;&bull;&nbsp;</span><span style="background-color: ${rgba};">&nbsp;<span style="color: white;">&bull;</span><span style='color: lightgrey;'>&bull;</span><span style="color: black;">&bull;</span>&nbsp;</span></span>`;
   }
   else {
-    return `<span title='${color}'><span style="background-color: ${color}; color: ${color};">&nbsp;&bull;&bull;&bull;&nbsp;</span><span style="background-color: ${color}; color: ${color};">&nbsp;&bull;&bull;&bull;&nbsp;</span></span>`;
+    result = `<span title='${color}'><span style="background-color: ${color}; color: ${color};">&nbsp;&bull;&bull;&bull;&nbsp;</span><span style="background-color: ${color}; color: ${color};">&nbsp;&bull;&bull;&bull;&nbsp;</span></span>`;
   }
+
+  return result + " <span style='font-size: 0.8em;'>" + renderColorSimple(color, isTranslucent) + "</span>";
+}
+function renderColorSimple(color: string, isTranslucent: boolean) {
+  return color + (isTranslucent ? "/TL" : "");
 }
 
 export async function click(dataItem: string, args: string) {
@@ -129,108 +157,16 @@ export async function click(dataItem: string, args: string) {
   }
 
   if (dataItem.startsWith("retire|")) {
-    let confirmed = await editor.confirm("Are you sure you want to retire that spool?");
-    if (confirmed) {
-      let spoolId = dataItem.substring(7);
-
-      let spools = await getSpools();
-      for (const s of spools) {
-        if (s.id == spoolId) {
-          s.isRetired = true;
-          await saveSpools(spools);
-          await refreshInternal("Spool retired.");
-          break;
-        }
-      };
-    }
+    await retireSpool(dataItem.substring(7));
   }
   else if (dataItem == "newspool") {
-    if (!hasContent(args)) {
-      log("No valid arguments.");
-      return;
-    }
-
-    let pairs = args.split("&");
-    let spoolBrand: string = "";
-    let spoolMaterial: string = "";
-    let spoolColor: string = "";
-    let spoolTranslucent: boolean = false;
-    let spoolNetWeight: number = 0;
-    let spoolGrossWeight: number = 0;
-
-    for (const p of pairs) {
-      let tuple = p.split('=');
-      tuple[1] = decodeURIComponent(tuple[1]);
-
-      if (tuple[0] == "br") {
-        spoolBrand = tuple[1];
-      }
-      else if (tuple[0] == "mt") {
-        spoolMaterial = tuple[1];
-      }
-      else if (tuple[0] == "cl") {
-        spoolColor = tuple[1].toUpperCase();
-      }
-      else if (tuple[0] == "tl") {
-        tuple[1] = tuple[1].toLowerCase();
-        spoolTranslucent = tuple[1] === "true" || tuple[1] === "1" || tuple[1] === "on";
-      }
-      else if (tuple[0] == "nw") {
-        spoolNetWeight = Number(tuple[1]);
-      }
-      else if (tuple[0] == "gw") {
-        spoolGrossWeight = Number(tuple[1]);
-      }
-    }
-
-    if (!hasContent(spoolBrand)) {
-      editor.flashNotification("Please specify spool Brand.");
-      return;
-    }
-    if (!hasContent(spoolMaterial)) {
-      editor.flashNotification("Please specify spool Material.");
-      return;
-    }
-    if (!hasContent(spoolColor)) {
-      editor.flashNotification("Please specify spool Color.");
-      return;
-    }
-    if (spoolNetWeight <= 0 || spoolNetWeight > 10000) {
-      editor.flashNotification("Please specify a spool Net Weight between 1 and 10000.");
-      return;
-    }
-    if (spoolGrossWeight <= 0 || spoolGrossWeight > 10000) {
-      editor.flashNotification("Please specify a spool Gross Weight between 1 and 10000.");
-      return;
-    }
-    if (spoolGrossWeight <= spoolNetWeight) {
-      editor.flashNotification("Please specify a spool Gross Weight larger than Net Weight.");
-      return;
-    }
-
-    let confirmed = await editor.confirm("Are you sure you want to add that new spool?");
-    if (!confirmed) {
-      return;
-    }
-
-    let newSpool: LiveSpool = {
-      id: newUUID(),
-      brand: spoolBrand,
-      material: spoolMaterial,
-      color: spoolColor,
-      isTranslucent: spoolTranslucent,
-      initialNetWeight: spoolNetWeight,
-      grossWeight: spoolGrossWeight,
-      isRetired: false,
-      remainingWeight: spoolNetWeight
-    };
-
-    let spools = await getSpools();
-
-    spools.push(newSpool);
-
-    await saveSpools(spools);
-    await refreshInternal("New spool saved.")
+    await saveNewSpool(args);
+  }
+  else if (dataItem.startsWith("deletejob|")) {
+    await deletePrintJob(dataItem.substring(10));
+  }
+  else if (dataItem == "newprintjob") {
+    await saveNewPrintJob(args);
   }
   else {
     log("Invalid click data.");
@@ -241,13 +177,212 @@ export async function refresh() {
   // This might not be enough without a forced space sync?
   _config = null;
   _spools = null;
-  _jobs = null;
+  _printJobs = null;
   await refreshInternal("SilverSpooler data refreshed.");
 }
 
 async function refreshInternal(message: string) {
   await codeWidget.refreshAll();
   await editor.flashNotification(message);
+}
+
+async function retireSpool(spoolId: string) {
+  let confirmed = await editor.confirm("Are you sure you want to retire that spool?");
+  if (confirmed) {
+    let spools = await getSpools();
+    for (const s of spools) {
+      if (s.id == spoolId) {
+        s.isRetired = true;
+        await saveSpools(spools);
+        await refreshInternal("Spool retired.");
+        break;
+      }
+    };
+  }
+}
+
+async function saveNewSpool(args: string) {
+  if (!hasContent(args)) {
+    log("No valid arguments.");
+    return;
+  }
+
+  let pairs = args.split("&");
+  let spoolBrand: string = "";
+  let spoolMaterial: string = "";
+  let spoolColor: string = "";
+  let spoolTranslucent: boolean = false;
+  let spoolNetWeight: number = 0;
+  let spoolGrossWeight: number = 0;
+
+  for (const p of pairs) {
+    let tuple = p.split('=');
+    tuple[1] = decodeURIComponent(tuple[1]);
+
+    if (tuple[0] == "br") {
+      spoolBrand = tuple[1];
+    }
+    else if (tuple[0] == "mt") {
+      spoolMaterial = tuple[1];
+    }
+    else if (tuple[0] == "cl") {
+      spoolColor = tuple[1].toUpperCase();
+    }
+    else if (tuple[0] == "tl") {
+      tuple[1] = tuple[1].toLowerCase();
+      spoolTranslucent = tuple[1] === "true" || tuple[1] === "1" || tuple[1] === "on";
+    }
+    else if (tuple[0] == "nw") {
+      spoolNetWeight = Number(tuple[1]);
+    }
+    else if (tuple[0] == "gw") {
+      spoolGrossWeight = Number(tuple[1]);
+    }
+  }
+
+  if (!hasContent(spoolBrand)) {
+    editor.flashNotification("Please specify spool brand.");
+    return;
+  }
+  if (!hasContent(spoolMaterial)) {
+    editor.flashNotification("Please specify spool material.");
+    return;
+  }
+  if (!hasContent(spoolColor)) {
+    editor.flashNotification("Please specify spool color.");
+    return;
+  }
+  if (spoolNetWeight <= 0 || spoolNetWeight > 10000) {
+    editor.flashNotification("Please specify a spool net weight between 1 and 10000.");
+    return;
+  }
+  if (spoolGrossWeight <= 0 || spoolGrossWeight > 10000) {
+    editor.flashNotification("Please specify a spool gross weight between 1 and 10000.");
+    return;
+  }
+  if (spoolGrossWeight <= spoolNetWeight) {
+    editor.flashNotification("Please specify a spool gross weight larger than Net Weight.");
+    return;
+  }
+
+  let confirmed = await editor.confirm("Are you sure you want to add that new spool?");
+  if (!confirmed) {
+    return;
+  }
+
+  let newSpool: LiveSpool = {
+    id: newUUID(),
+    brand: spoolBrand,
+    material: spoolMaterial,
+    color: spoolColor,
+    isTranslucent: spoolTranslucent,
+    initialNetWeight: spoolNetWeight,
+    grossWeight: spoolGrossWeight,
+    isRetired: false,
+    remainingWeight: spoolNetWeight
+  };
+
+  let spools = await getSpools();
+
+  spools.push(newSpool);
+
+  await saveSpools(spools);
+  await refreshInternal("New spool saved.");
+}
+
+async function deletePrintJob(printJobId: string) {
+  let printJobs = await getPrintJobs();
+
+  let newPrintJobs = printJobs.filter(j => j.id !== printJobId);
+
+  if (newPrintJobs.length < printJobs.length) {
+    await savePrintJobs(newPrintJobs);
+    await editor.flashNotification("Print Job deleted.");
+  }
+}
+
+async function saveNewPrintJob(args: string) {
+  if (!hasContent(args)) {
+    log("No valid arguments.");
+    return;
+  }
+
+  let pairs = args.split("&");
+  let jobDate: string = "";
+  let jobDesc: string = "";
+  let jobSpoolId: string = "";
+  let jobWeight: number = 0;
+  let jobDuration: number = 0;
+  let jobNotes: string = "";
+
+  for (const p of pairs) {
+    let tuple = p.split('=');
+    tuple[1] = decodeURIComponent(tuple[1]);
+
+    if (tuple[0] == "dt") {
+      jobDate = tuple[1];
+    }
+    else if (tuple[0] == "ds") {
+      jobDesc = tuple[1];
+    }
+    else if (tuple[0] == "fl") {
+      jobSpoolId = tuple[1];
+    }
+    else if (tuple[0] == "wg") {
+      jobWeight = Number(tuple[1]);
+    }
+    else if (tuple[0] == "dr") {
+      jobDuration = Number(tuple[1]);
+    }
+    else if (tuple[0] == "nt") {
+      jobNotes = tuple[1];
+    }
+  }
+
+  let selectedSpool = (await getSpools()).find(s => s.id === jobSpoolId);
+
+  if (!/^[0-9]{4}-[0-9]{2}-[0-9]{2}$/.test(jobDate)) {
+    editor.flashNotification("Please specify a valid print job date.");
+    return;
+  }
+  if (typeof selectedSpool === "undefined") {
+    editor.flashNotification("Please specify a valid filament spool.");
+    return;
+  }
+  if (jobWeight <= 0 || jobWeight > 10000) {
+    editor.flashNotification("Please specify a print job weight between 1 and 10000.");
+    return;
+  }
+  if (jobDuration <= 0 || jobDuration > 1000) {
+    editor.flashNotification("Please specify a print job duration between 1 and 1000.");
+    return;
+  }
+
+  let confirmed = await editor.confirm("Are you sure you want to add that new print job?");
+  if (!confirmed) {
+    return;
+  }
+
+  let newPrintJob: LivePrintJob = {
+    id: newUUID(),
+    spoolId: jobSpoolId,
+    date: jobDate,
+    description: jobDesc,
+    filamentWeight: jobWeight,
+    duration: jobDuration,
+    notes: jobNotes,
+    spoolBrand: selectedSpool.brand,
+    spoolMaterial: selectedSpool.material,
+    spoolColor: selectedSpool.color,
+    spoolIsTranslucent: selectedSpool.isTranslucent
+  };
+
+  let printJobs = await getPrintJobs();
+
+  printJobs.push(newPrintJob);
+
+  await savePrintJobs(printJobs);
+  await refreshInternal("New print job saved.");
 }
 
 var _spools: Array<LiveSpool> | null;
@@ -294,26 +429,26 @@ async function saveSpools(spools: Array<LiveSpool>) {
   await space.writeDocument(await getFilePath(SPOOLS_FILE), stringToUint8Array(rawData));
 }
 
-var _jobs: Array<LivePrintJob> | null;
+var _printJobs: Array<LivePrintJob> | null;
 async function getPrintJobs(): Promise<Array<LivePrintJob>> {
-  if (_jobs === undefined || _jobs === null) {
+  if (_printJobs === undefined || _printJobs === null) {
     let jf = await getFilePath(JOBS_FILE);
     log("Loading jobs from " + jf);
     let jobsData = uint8ArrayToString(await space.readDocument(jf));
 
     if (hasContent(jobsData)) {
       // No sort to preserve performance
-      _jobs = await yamlparse(jobsData).jobs as Array<LivePrintJob>;
-      await loadSpoolNames(_jobs);
+      _printJobs = await yamlparse(jobsData).jobs as Array<LivePrintJob>;
+      await loadSpoolNames(_printJobs);
     }
     else {
-      _jobs = new Array<LivePrintJob>();
+      _printJobs = new Array<LivePrintJob>();
     }
 
-    log("Loaded jobs: " + _jobs.length);
+    log("Loaded jobs: " + _printJobs.length);
   }
 
-  return _jobs;
+  return _printJobs;
 }
 
 async function loadRemainingWeight(spools: Array<LiveSpool>) {
@@ -348,6 +483,28 @@ async function loadSpoolNames(jobs: Array<LivePrintJob>) {
       }
     });
   });
+}
+
+async function savePrintJobs(printJobs: Array<LivePrintJob>) {
+  _printJobs = printJobs;
+
+  let staticJobs: Array<PrintJob> = new Array<PrintJob>();
+
+  for (const j of printJobs) {
+    staticJobs.push({
+      id: j.id,
+      spoolId: j.spoolId,
+      date: j.date,
+      description: j.description,
+      filamentWeight: j.filamentWeight,
+      duration: j.duration,
+      notes: typeof j.notes === "string" ? j.notes : ""
+    } as PrintJob);
+  }
+
+  let rawData = await yamlstringify({ spools: staticJobs });
+
+  await space.writeDocument(await getFilePath(JOBS_FILE), stringToUint8Array(rawData));
 }
 
 function prettifyDuration(duration: number): string {
