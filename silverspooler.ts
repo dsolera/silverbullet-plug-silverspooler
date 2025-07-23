@@ -103,12 +103,12 @@ export async function renderPrintJobs(excludeRetired: boolean | true): Promise<s
   }
 
   html += `<tr class='newprintjob'>
-    <td><input type='date' required id='printjobdate' style='width: 100%;' /></td>
-    <td><input type='text' required id='printjobdesc' placeholder='Job Description' style='width: 100%;' /></td>
-    <td colspan='3'><select id='printjobfilament'>${filamentOptions}</select></td>
-    <td style='text-align: right;'><input type='number' required id='printjobweight' style='width: 60%; text-align: right;' /></td>
-    <td style='text-align: right;'><input type='number' required id='printjobduration' style='width: 60%; text-align: right;' /></td>
-    <td><input type='text' required id='printjobnotes' style='width: 100%;' /></td>
+    <td><input type='date' required id='printjobdate' style='width: 100%;' value="${typeof _justDeletedPrintJob !== "undefined" ? _justDeletedPrintJob?.date : ""}" /></td>
+    <td><input type='text' required id='printjobdesc' placeholder='Job Description' style='width: 100%;' value="${typeof _justDeletedPrintJob !== "undefined" ? _justDeletedPrintJob?.description : ""}" /></td>
+    <td colspan='3'><select id='printjobfilament' value="${typeof _justDeletedPrintJob !== "undefined" ? _justDeletedPrintJob?.spoolId : ""}">${filamentOptions}</select></td>
+    <td style='text-align: right;'><input type='number' required id='printjobweight' style='width: 60%; text-align: right;' value="${typeof _justDeletedPrintJob !== "undefined" ? _justDeletedPrintJob?.filamentWeight : ""}" /></td>
+    <td style='text-align: right;'><input type='number' required id='printjobduration' style='width: 60%; text-align: right;' value="${typeof _justDeletedPrintJob !== "undefined" ? _justDeletedPrintJob?.duration : ""}" /></td>
+    <td><input type='text' required id='printjobnotes' style='width: 100%;' value="${typeof _justDeletedPrintJob !== "undefined" ? _justDeletedPrintJob?.notes : ""}" /></td>
     <td>
       <button class="sb-button-primary" data-item="newprintjob" onclick='javascript:document.getElementById("newprintjobdata").value ="dt="+encodeURIComponent(document.getElementById("printjobdate").value)+"&ds="+encodeURIComponent(document.getElementById("printjobdesc").value)+"&fl="+encodeURIComponent(document.getElementById("printjobfilament").value)+"&wg="+encodeURIComponent(document.getElementById("printjobweight").value)+"&dr="+encodeURIComponent(document.getElementById("printjobduration").value)+"&nt="+encodeURIComponent(document.getElementById("printjobnotes").value);'>Add</button>
       <input type='hidden' id='newprintjobdata' value='test-data' />
@@ -303,11 +303,13 @@ async function saveNewSpool(args: string) {
 async function deletePrintJob(printJobId: string) {
   let printJobs = await getPrintJobs();
 
+  _justDeletedPrintJob = printJobs.find(j => j.id === printJobId);
+
   let newPrintJobs = printJobs.filter(j => j.id !== printJobId);
 
   if (newPrintJobs.length < printJobs.length) {
     await savePrintJobs(newPrintJobs);
-    await editor.flashNotification("Print Job deleted.");
+    await refreshInternal("Print job deleted.");
   }
 }
 
@@ -393,6 +395,7 @@ async function saveNewPrintJob(args: string) {
   printJobs.push(newPrintJob);
 
   await savePrintJobs(printJobs);
+  _justDeletedPrintJob = undefined;
   await refreshInternal("New print job saved.");
 }
 
@@ -447,6 +450,7 @@ async function saveSpools(spools: Array<LiveSpool>) {
   await space.writeDocument(await getFilePath(SPOOLS_FILE), stringToUint8Array(rawData));
 }
 
+var _justDeletedPrintJob: LivePrintJob | undefined;
 var _printJobs: Array<LivePrintJob> | null;
 async function getPrintJobs(): Promise<Array<LivePrintJob>> {
   if (_printJobs === undefined || _printJobs === null) {
@@ -531,6 +535,9 @@ async function savePrintJobs(printJobs: Array<LivePrintJob>) {
   let rawData = await yamlstringify({ jobs: staticJobs });
 
   await space.writeDocument(await getFilePath(JOBS_FILE), stringToUint8Array(rawData));
+
+  // Need to force a cleanup to re-calculate spool remaining filament
+  _spools = null;
 }
 
 function prettifyDuration(duration: number): string {
