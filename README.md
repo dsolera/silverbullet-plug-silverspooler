@@ -67,10 +67,10 @@ Please note that hiding retired spools forbids the deletion of the print jobs th
 
 ### Data Refresh
 
-If you modify the files outside SilverBullet, after letting SB sync the new files you can invoke the `SilverSearch: Refresh` command to reload all the data. You can also create a button using another Lua Expression.
+If you modify the files outside SilverBullet, after letting SB sync the new files you can invoke the `SilverSearch: Refresh` command to reload all the data. You can also create a button using a Lua Expression.
 
 ```lua
-${ widget.html(dom.button { onclick = function() editor.invokeCommand("SilverSpooler: Refresh") end, "Refresh Data" }) }
+${ widget.html(dom.button { onclick = function() editor.invokeCommand("Sync: Now") editor.invokeCommand("SilverSpooler: Refresh") end, "Refresh Data", class = "sb-button-primary" }) }
 ```
 
 ## Installation
