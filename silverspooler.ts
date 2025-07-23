@@ -48,15 +48,15 @@ export async function renderSpools(excludeRetired: boolean | true): Promise<stri
       <td>${s.material}</td>
       <td>${renderColor(s.color, s.isTranslucent)}</td>`;
 
-      let notesBlock = `<td style='font-size: 0.8em;'>${s.notes ? s.notes : ""} <button class='sb-button' data-item="spoolnote|${s.id}">Edit</button></td>`;
+      let notesBlock = `<td style='font-size: 0.8em;'>${s.notes ? s.notes : ""} <button class='sb-button' data-item="spoolnote|${s.id}" style="margin-left: 8px;">Edit</button></td>`;
 
       if (s.isRetired) {
         html += `<td style='text-align: right;' class='remaining'>&mdash;</td><td style='text-align: right;'>&mdash;</td><td style='text-align: right;'>&mdash;</td>${notesBlock}<td></td>`;
       }
       else {
         html += `
-        <td style='text-align: right;' class='left'">${s.remainingWeight}</td>
-        <td style='text-align: right;' class="net">${s.initialNetWeight}</td>
+        <td style='text-align: right;' class="left">${s.remainingWeight}</td>
+        <td style='text-align: right;' class="net"><button class="sb-button" data-item="spoolremaining|${s.id}" title="Modify the initial weight" style="font-size: 0.72em; margin-right: 8px;">Edit</button> ${s.initialNetWeight}</td>
         <td style='text-align: right;' class="gross">${s.grossWeight}</td>
         ${notesBlock}`;
         html += `<td><button class='sb-button-primary spoolretire' data-item='retire|${s.id}'>Retire</button></td>`;
@@ -200,6 +200,9 @@ export async function click(dataItem: string, args: string) {
   else if (dataItem.startsWith("spoolnote|")) {
     await editSpoolNote(dataItem.substring(10));
   }
+  else if (dataItem.startsWith("spoolremaining|")) {
+    await editSpoolInitialWeight(dataItem.substring(15));
+  }
   else {
     log("Invalid click data.");
   }
@@ -290,11 +293,11 @@ async function saveNewSpool(args: string) {
     return;
   }
   if (spoolNetWeight <= 0 || spoolNetWeight > 10000) {
-    editor.flashNotification("Please specify a spool net weight between 1 and 10000.");
+    editor.flashNotification("Please specify an initial spool weight between 1 and 10000.");
     return;
   }
   if (spoolGrossWeight <= 0 || spoolGrossWeight > 10000) {
-    editor.flashNotification("Please specify a spool gross weight between 1 and 10000.");
+    editor.flashNotification("Please specify a gross spool weight between 1 and 10000.");
     return;
   }
   if (spoolGrossWeight <= spoolNetWeight) {
@@ -443,6 +446,36 @@ async function editSpoolNote(spoolId: string) {
     mySpool.notes = newNote;
     await saveSpools(spools);
     await refreshInternal("Spool notes saved.");
+  }
+}
+
+async function editSpoolInitialWeight(spoolId: string) {
+  let spools = await getSpools();
+
+  let mySpool = spools.find(s => s.id === spoolId);
+
+  if (typeof mySpool === "undefined") {
+    log("Spool not found.");
+    return;
+  }
+
+  let newWeightString = await editor.prompt("Modify initial spool weight:", mySpool.initialNetWeight.toString());
+
+  if (typeof newWeightString === "undefined") {
+    return;
+  }
+
+  let newWeight = Number(newWeightString);
+
+  if (isNaN(newWeight) || newWeight <= 0 || newWeight > 10000) {
+    editor.flashNotification("Please specify an initial spool weight between 1 and 10000.");
+    return;
+  }
+
+  if (newWeight !== mySpool.initialNetWeight) {
+    mySpool.initialNetWeight = newWeight;
+    await saveSpools(spools);
+    await refreshInternal("Initial spool weight saved.");
   }
 }
 
