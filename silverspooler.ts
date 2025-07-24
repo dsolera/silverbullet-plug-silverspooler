@@ -704,7 +704,7 @@ async function getConfig(): Promise<SilverSpoolerConfig> {
       if (config.pathPrefix.startsWith("/")) {
         config.pathPrefix = config.pathPrefix.substring(1);
       }
-      if (!config.pathPrefix.endWith("/")) {
+      if (!config.pathPrefix.endsWith("/")) {
         config.pathPrefix += "/";
       }
     }
