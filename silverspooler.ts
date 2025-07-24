@@ -700,6 +700,14 @@ async function getConfig(): Promise<SilverSpoolerConfig> {
     if (!hasContent(config.pathPrefix)) {
       config.pathPrefix = "Files/SilverSpooler/";
     }
+    else {
+      if (config.pathPrefix.startsWith("/")) {
+        config.pathPrefix = config.pathPrefix.substring(1);
+      }
+      if (!config.pathPrefix.endWith("/")) {
+        config.pathPrefix += "/";
+      }
+    }
 
     _config = config;
   }

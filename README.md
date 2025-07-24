@@ -26,7 +26,6 @@ You can change this path by adding a configuration key.
 -- Priority: 80
 config.set {
   silverSpooler = {
-    -- Don't include leading slash, DO INCLUDE trailing slash
     pathPrefix = "Your/Path/"
   }
 }
