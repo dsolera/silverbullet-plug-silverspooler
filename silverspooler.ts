@@ -1,7 +1,7 @@
 import { space, system, editor, codeWidget } from "@silverbulletmd/silverbullet/syscalls";
 
 const SPOOLS_FILE = "spools.json";
-const JOBS_FILE = "jobs.json";
+const PRINT_JOBS_FILE = "jobs.json";
 
 export async function renderSpools(excludeRetired: boolean | true): Promise<string> {
   let spools = await getSpools();
@@ -576,7 +576,7 @@ var _justDeletedPrintJob: LivePrintJob | undefined;
 var _printJobs: Array<LivePrintJob> | null;
 async function getPrintJobs(): Promise<Array<LivePrintJob>> {
   if (_printJobs === undefined || _printJobs === null) {
-    let jf = await getFilePath(JOBS_FILE);
+    let jf = await getFilePath(PRINT_JOBS_FILE);
     log("Loading jobs from " + jf);
 
     let jobsData = "";
@@ -656,7 +656,7 @@ async function savePrintJobs(printJobs: Array<LivePrintJob>) {
 
   let rawData = await JSON.stringify({ jobs: staticJobs });
 
-  await space.writeDocument(await getFilePath(JOBS_FILE), stringToUint8Array(rawData));
+  await space.writeDocument(await getFilePath(PRINT_JOBS_FILE), stringToUint8Array(rawData));
 
   // Need to force a cleanup to re-calculate spool remaining filament
   _spools = null;
@@ -679,7 +679,7 @@ function prettifyDuration(duration: number): string {
 function renderShortDescription(description: string): string {
   if (!hasContent(description)) return "";
 
-  // 1 more to account for ellipsis in shortened form
+  // 1 more char to account for ellipsis in shortened form
   if (description.length <= 27) return description;
 
   return `<span title="${description}">${description.substring(0, 26)}&hellip;</span>`;
