@@ -1,8 +1,7 @@
 import { space, system, editor, codeWidget } from "@silverbulletmd/silverbullet/syscalls";
-import { parse as yamlparse, stringify as yamlstringify } from "jsr:@std/yaml";
 
-const SPOOLS_FILE = "spools.yaml";
-const JOBS_FILE = "jobs.yaml";
+const SPOOLS_FILE = "spools.json";
+const JOBS_FILE = "jobs.json";
 
 export async function renderSpools(excludeRetired: boolean | true): Promise<string> {
   let spools = await getSpools();
@@ -536,7 +535,7 @@ async function getSpools(): Promise<Array<LiveSpool>> {
     }
 
     if (hasContent(spoolsData)) {
-      _spools = await yamlparse(spoolsData).spools as Array<LiveSpool>;
+      _spools = await JSON.parse(spoolsData).spools as Array<LiveSpool>;
       await loadRemainingWeight(_spools);
     }
     else {
@@ -568,7 +567,7 @@ async function saveSpools(spools: Array<LiveSpool>) {
     } as Spool);
   }
 
-  let rawData = await yamlstringify({ spools: staticSpools });
+  let rawData = await JSON.stringify({ spools: staticSpools });
 
   await space.writeDocument(await getFilePath(SPOOLS_FILE), stringToUint8Array(rawData));
 }
@@ -590,7 +589,7 @@ async function getPrintJobs(): Promise<Array<LivePrintJob>> {
 
     if (hasContent(jobsData)) {
       // No sort to preserve performance
-      _printJobs = await yamlparse(jobsData).jobs as Array<LivePrintJob>;
+      _printJobs = await JSON.parse(jobsData).jobs as Array<LivePrintJob>;
       await loadSpoolData(_printJobs);
     }
     else {
@@ -655,7 +654,7 @@ async function savePrintJobs(printJobs: Array<LivePrintJob>) {
     } as PrintJob);
   }
 
-  let rawData = await yamlstringify({ jobs: staticJobs });
+  let rawData = await JSON.stringify({ jobs: staticJobs });
 
   await space.writeDocument(await getFilePath(JOBS_FILE), stringToUint8Array(rawData));
 

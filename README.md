@@ -14,7 +14,7 @@ This plug allows to:
 
 This plug does not record printer information and does not allow to group filament and print jobs by printer.
 
-All data is saved in YAML files that is easily portable and human-readable.
+All data is saved in JSON files that are easily portable and human-readable.
 
 ## Configuration
 
