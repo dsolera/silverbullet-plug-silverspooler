@@ -30,7 +30,7 @@ export async function renderSpools(excludeRetired: boolean | true): Promise<stri
     <td style='text-align: right;'><input type='number' required id='spoolgrossweight' style='width: 60%; text-align: right;' /></td>
     <td><input type='text' id='spoolnotes' style='width: 100%;' /></td>
     <td>
-      <button class="sb-button-primary" data-item="newspool" onclick='javascript:document.getElementById("newspooldata").value ="br="+encodeURIComponent(document.getElementById("spoolbrand").value)+"&mt="+encodeURIComponent(document.getElementById("spoolmaterial").value)+"&cl="+encodeURIComponent(document.getElementById("spoolcolor").value)+"&tl="+encodeURIComponent(document.getElementById("spooltranslucent").checked)+"&nw="+encodeURIComponent(document.getElementById("spoolnetweight").value)+"&gw="+encodeURIComponent(document.getElementById("spoolgrossweight").value)+"&nt="+encodeURIComponent(document.getElementById("spoolnotes").value);'>Add</button>
+      <button class="sb-button-primary spooladd" data-item="newspool" onclick='javascript:document.getElementById("newspooldata").value ="br="+encodeURIComponent(document.getElementById("spoolbrand").value)+"&mt="+encodeURIComponent(document.getElementById("spoolmaterial").value)+"&cl="+encodeURIComponent(document.getElementById("spoolcolor").value)+"&tl="+encodeURIComponent(document.getElementById("spooltranslucent").checked)+"&nw="+encodeURIComponent(document.getElementById("spoolnetweight").value)+"&gw="+encodeURIComponent(document.getElementById("spoolgrossweight").value)+"&nt="+encodeURIComponent(document.getElementById("spoolnotes").value);'>Add</button>
       <input type='hidden' id='newspooldata' value='test-data' />
     </td></tr>`;
 
@@ -42,14 +42,14 @@ export async function renderSpools(excludeRetired: boolean | true): Promise<stri
   spools.forEach((s) => {
     if (!excludeRetired || (excludeRetired && !s.isRetired)) {
       html += `<tr class='${s.isRetired ? "retired" : "active"}'>
-      <td>${s.brand}</td>
-      <td>${s.material}</td>
-      <td>${renderColor(s.color, s.isTranslucent)}</td>`;
+      <td class="spoolbrand">${s.brand}</td>
+      <td class="spoolmaterial">${s.material}</td>
+      <td class="spoolcolor">${renderColor(s.color, s.isTranslucent)}</td>`;
 
-      let notesBlock = `<td style='font-size: 0.8em;'>${renderShortDescription(s.notes)} <button class='sb-button' data-item="spoolnote|${s.id}" style="margin-left: 8px;">Edit</button></td>`;
+      let notesBlock = `<td style='font-size: 0.8em;' class="spoolnotes">${renderShortDescription(s.notes)} <button class='sb-button' data-item="spoolnote|${s.id}" style="margin-left: 8px;">Edit</button></td>`;
 
       if (s.isRetired) {
-        html += `<td style='text-align: right;' class='remaining'>&mdash;</td><td style='text-align: right;'>&mdash;</td><td style='text-align: right;'>&mdash;</td>${notesBlock}<td></td>`;
+        html += `<td style='text-align: right;' class='left'>&mdash;</td><td style='text-align: right;'>&mdash;</td><td style='text-align: right;'>&mdash;</td>${notesBlock}<td></td>`;
       }
       else {
         html += `
@@ -121,7 +121,7 @@ export async function renderPrintJobs(excludeRetired: boolean | true, limit: num
     <td style='text-align: right;'><input type='number' required id='printjobduration' style='width: 60%; text-align: right;' value="${typeof _justDeletedPrintJob !== "undefined" ? _justDeletedPrintJob?.duration : ""}" title="Please enter a duration in minutes." /></td>
     <td><input type='text' id='printjobnotes' style='width: 100%;' value="${typeof _justDeletedPrintJob !== "undefined" ? _justDeletedPrintJob?.notes : ""}" /></td>
     <td>
-      <button class="sb-button-primary" data-item="newprintjob" onclick='javascript:document.getElementById("newprintjobdata").value ="dt="+encodeURIComponent(document.getElementById("printjobdate").value)+"&ds="+encodeURIComponent(document.getElementById("printjobdesc").value)+"&fl="+encodeURIComponent(document.getElementById("printjobfilament").value)+"&wg="+encodeURIComponent(document.getElementById("printjobweight").value)+"&dr="+encodeURIComponent(document.getElementById("printjobduration").value)+"&nt="+encodeURIComponent(document.getElementById("printjobnotes").value);'>Add</button>
+      <button class="sb-button-primary jobadd" data-item="newprintjob" onclick='javascript:document.getElementById("newprintjobdata").value ="dt="+encodeURIComponent(document.getElementById("printjobdate").value)+"&ds="+encodeURIComponent(document.getElementById("printjobdesc").value)+"&fl="+encodeURIComponent(document.getElementById("printjobfilament").value)+"&wg="+encodeURIComponent(document.getElementById("printjobweight").value)+"&dr="+encodeURIComponent(document.getElementById("printjobduration").value)+"&nt="+encodeURIComponent(document.getElementById("printjobnotes").value);'>Add</button>
       <input type='hidden' id='newprintjobdata' value='test-data' />
     </td></tr>`;
 
@@ -134,20 +134,20 @@ export async function renderPrintJobs(excludeRetired: boolean | true, limit: num
   for (const j of jobs) {
     if (!limitReached) {
       html += `<tr>
-        <td style='text-align: right;'>${new Date(j.date).toLocaleDateString()}</td>
-        <td style='font-size: 0.8em;'>${renderShortDescription(j.description)}</td>
-        <td class='${j.spoolIsRetired ? "retired" : ""}'>${j.spoolBrand} | ${j.spoolMaterial}</td>
+        <td style='text-align: right;' class="jobdate">${new Date(j.date).toLocaleDateString()}</td>
+        <td style='font-size: 0.8em;' class="jobdesc">${renderShortDescription(j.description)}</td>
+        <td class='jobspool ${j.spoolIsRetired ? "retired" : ""}'>${j.spoolBrand} | ${j.spoolMaterial}</td>
         <td style="font-size: 0.8em;">${renderColor(j.spoolColor, j.spoolIsTranslucent)}</td>
-        <td style='text-align: right;'>${j.filamentWeight}</td>
-        <td style='text-align: right;'>${prettifyDuration(j.duration)}</td>
-        <td style='font-size: 0.8em;'>${renderShortDescription(j.notes)}</td>`;
+        <td style='text-align: right; class="jobweight"'>${j.filamentWeight}</td>
+        <td style='text-align: right; class="jobduration"'>${prettifyDuration(j.duration)}</td>
+        <td style='font-size: 0.8em;' class="jobnotes">${renderShortDescription(j.notes)}</td>`;
 
       if (j.spoolIsRetired && excludeRetired) {
         html += "<td></td>";
       }
       else {
         html +=
-          `<td><button class='sb-button-primary' onclick='javascript:document.getElementById("printjobdate").value="${j.date.substring(0, 10)}";document.getElementById("printjobdesc").value="${j.description}";document.getElementById("printjobfilament").value="${j.spoolId}";document.getElementById("printjobweight").value="${j.filamentWeight}";document.getElementById("printjobduration").value="${j.duration}";document.getElementById("printjobnotes").value="${j.notes ? j.notes : ''}";this.parentElement.parentElement.remove();' data-item="deletejob|${j.id}" title="Delete this print job and add it again">Delete</button></td>`;
+          `<td><button class='sb-button-primary jobdelete' onclick='javascript:document.getElementById("printjobdate").value="${j.date.substring(0, 10)}";document.getElementById("printjobdesc").value="${j.description}";document.getElementById("printjobfilament").value="${j.spoolId}";document.getElementById("printjobweight").value="${j.filamentWeight}";document.getElementById("printjobduration").value="${j.duration}";document.getElementById("printjobnotes").value="${j.notes ? j.notes : ''}";this.parentElement.parentElement.remove();' data-item="deletejob|${j.id}" title="Delete this print job and add it again">Delete</button></td>`;
       }
       html += "</tr>";
     }
