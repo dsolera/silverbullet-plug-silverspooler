@@ -3,7 +3,10 @@ import { space, system, editor, codeWidget } from "@silverbulletmd/silverbullet/
 const SPOOLS_FILE = "spools.json";
 const PRINT_JOBS_FILE = "jobs.json";
 
-export async function renderSpools(excludeRetired: boolean | true): Promise<string> {
+export async function renderSpools(excludeRetired: boolean | undefined, displayUseButton: boolean | undefined): Promise<string> {
+  if (typeof excludeRetired === "undefined") excludeRetired = true;
+  if (typeof displayUseButton === "undefined") displayUseButton = true;
+
   let spools = await getSpools();
 
   let html = `<div class='silverspooler spools'>
@@ -43,7 +46,7 @@ export async function renderSpools(excludeRetired: boolean | true): Promise<stri
     if (!excludeRetired || (excludeRetired && !s.isRetired)) {
       html += `<tr class='${s.isRetired ? "retired" : "active"}'>
       <td class="spoolbrand">${s.brand}</td>
-      <td class="spoolmaterial">${s.material}${!s.isRetired ? ` <button class="sb-button spooluse" onclick="javascript:document.getElementById('printjobfilament').value='${s.id}'; return false;" title="Select this filament for a new print job.">Use</button>` : ""}</td>
+      <td class="spoolmaterial">${s.material}${!s.isRetired && displayUseButton ? ` <button class="sb-button spooluse" onclick="javascript:document.getElementById('printjobfilament').value='${s.id}'; return false;" title="Select this filament for a new print job.">Use</button>` : ""}</td>
       <td class="spoolcolor">${renderColor(s.color, s.isTranslucent)}</td>`;
 
       let notesBlock = `<td class="spoolnotes">${renderShortDescription(s.notes)} <button class='sb-button spooleditnotes' data-item="spoolnote|${s.id}">Edit</button></td>`;
