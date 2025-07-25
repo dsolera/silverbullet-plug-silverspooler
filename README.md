@@ -51,7 +51,7 @@ In the `invokeFunction` call, you can optionally specify a `boolean` to hide ret
 ... system.invokeFunction("silverspooler.renderSpools", true) ...
 ```
 
-You can also specify a second parameter to decide if you want to include a "Use" button near each filament, to select their record in the "New Print Job" form, if present on the same page: `true` (default) to display the butto, `false` to hide them.
+You can also specify a second parameter to decide if you want to include a "Use" button near each filament, to select their record in the "New Print Job" form, if present on the same page: `true` (default) to display the butto, `false` to hide them (for example, if you keep the two lists on separate pages).
 
 ```lua
 ... system.invokeFunction("silverspooler.renderSpools", true, true) ...
