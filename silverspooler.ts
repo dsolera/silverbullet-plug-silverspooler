@@ -136,7 +136,7 @@ export async function renderPrintJobs(excludeRetired: boolean | true, limit: num
       html += `<tr>
         <td style='text-align: right;'>${new Date(j.date).toLocaleDateString()}</td>
         <td style='font-size: 0.8em;'>${renderShortDescription(j.description)}</td>
-        <td>${j.spoolBrand} | ${j.spoolMaterial}</td>
+        <td class='${j.spoolIsRetired ? "retired" : ""}'>${j.spoolBrand} | ${j.spoolMaterial}</td>
         <td style="font-size: 0.8em;">${renderColor(j.spoolColor, j.spoolIsTranslucent)}</td>
         <td style='text-align: right;'>${j.filamentWeight}</td>
         <td style='text-align: right;'>${prettifyDuration(j.duration)}</td>

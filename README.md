@@ -59,7 +59,7 @@ Include this Lua Expression:
 ${ widget.new { html = system.invokeFunction("silverspooler.renderPrintJobs", true), events = { click = function(e) system.invokeFunction("silverspooler.click", e.data.target.getAttribute("data-item"), js.window.document.getElementById("newprintjobdata").value) end }, display = "block" } }
 ```
 
-In the `invokeFunction` call, you can optionally specify a `boolean` to hide retired (fully used) spools: `true` to hide retired spools, `false` (default) to include them.
+In the `invokeFunction` call, you can optionally specify a `boolean` to hide retired (fully used) spools so that they are no longer selectable for new print jobs: `true` to hide retired spools, `false` (default) to include them.
 
 ```lua
 ... system.invokeFunction("silverspooler.renderPrintJobs", true) ...
