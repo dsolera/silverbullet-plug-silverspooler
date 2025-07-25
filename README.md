@@ -45,16 +45,10 @@ Include this Lua Expression:
 ${ widget.new { html = system.invokeFunction("silverspooler.renderSpools"), events = { click = function(e) system.invokeFunction("silverspooler.click", e.data.target.getAttribute("data-item"), js.window.document.getElementById("newspooldata").value) end }, display = "block" } }
 ```
 
-In the `invokeFunction` call, you can optionally specify a `boolean` to hide retired (fully used) spools: `true` to hide retired spools, `false' (default) to include them.
+In the `invokeFunction` call, you can optionally specify a `boolean` to hide retired (fully used) spools: `true` to hide retired spools, `false` (default) to include them.
 
 ```lua
 ... system.invokeFunction("silverspooler.renderSpools", true) ...
-```
-
-You can also specify the maximum number of print jobs to show, for example to 15. Please note that hidden jobs will still count towards the overall statistics.
-
-```lua
-... system.invokeFunction("silverspooler.renderSpools", true, 15) ...
 ```
 
 ### Print Jobs Management
@@ -65,13 +59,19 @@ Include this Lua Expression:
 ${ widget.new { html = system.invokeFunction("silverspooler.renderPrintJobs", true), events = { click = function(e) system.invokeFunction("silverspooler.click", e.data.target.getAttribute("data-item"), js.window.document.getElementById("newprintjobdata").value) end }, display = "block" } }
 ```
 
-In the `invokeFunction` call, you can optionally specify a `boolean` to hide retired (fully used) spools: `true` to hide retired spools, `false' (default) to include them.
+In the `invokeFunction` call, you can optionally specify a `boolean` to hide retired (fully used) spools: `true` to hide retired spools, `false` (default) to include them.
 
 ```lua
 ... system.invokeFunction("silverspooler.renderPrintJobs", true) ...
 ```
 
 Please note that hiding retired spools forbids the deletion of the print jobs that have used them.
+
+You can also specify the maximum number of print jobs to show, for example to 15. Please note that hidden jobs will still count towards the overall statistics.
+
+```lua
+... system.invokeFunction("silverspooler.renderSpools", true, 15) ...
+```
 
 ### Data Refresh
 
