@@ -70,7 +70,7 @@ Please note that hiding retired spools forbids the deletion of the print jobs th
 You can also specify the maximum number of print jobs to show, for example to 15. Please note that hidden jobs will still count towards the overall statistics.
 
 ```lua
-... system.invokeFunction("silverspooler.renderSpools", true, 15) ...
+... system.invokeFunction("silverspooler.renderPrintJobs", true, 15) ...
 ```
 
 ### Data Refresh
