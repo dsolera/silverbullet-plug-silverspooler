@@ -25,7 +25,7 @@ export async function renderSpools(excludeRetired: boolean | true): Promise<stri
   html += `<tr class='newspool'>
     <td><input type='text' required id='spoolbrand' placeholder='Brand' style='width: 100%;' /></td>
     <td><input type='text' required id='spoolmaterial' placeholder='Material' style='width: 100%;' /></td>
-    <td colspan='2'><input type='color' required id='spoolcolor' style='width: 50px;' /><input type='checkbox' id='spooltranslucent' /> <label for='spooltranslucent' title='Translucent or transparent filament'>TL</label></td>
+    <td colspan='2'><input type='color' required id='spoolcolor' style='width: 50px;' />&nbsp;<input type='checkbox' id='spooltranslucent' /> <label for='spooltranslucent' title='Translucent or transparent filament'>TL</label></td>
     <td style='text-align: right;'><input type='number' required id='spoolnetweight' style='width: 60%; text-align: right;' value='1000' /></td>
     <td style='text-align: right;'><input type='number' required id='spoolgrossweight' style='width: 60%; text-align: right;' /></td>
     <td><input type='text' id='spoolnotes' style='width: 100%;' /></td>
@@ -43,10 +43,10 @@ export async function renderSpools(excludeRetired: boolean | true): Promise<stri
     if (!excludeRetired || (excludeRetired && !s.isRetired)) {
       html += `<tr class='${s.isRetired ? "retired" : "active"}'>
       <td class="spoolbrand">${s.brand}</td>
-      <td class="spoolmaterial">${s.material}${!s.isRetired ? ` <button class="sb-button" style="font-size: 0.72em;" onclick="javascript:document.getElementById('printjobfilament').value='${s.id}'; return false;" title="Select this filament for a new print job.">Use</button>` : ""}</td>
+      <td class="spoolmaterial">${s.material}${!s.isRetired ? ` <button class="sb-button spooluse" onclick="javascript:document.getElementById('printjobfilament').value='${s.id}'; return false;" title="Select this filament for a new print job.">Use</button>` : ""}</td>
       <td class="spoolcolor">${renderColor(s.color, s.isTranslucent)}</td>`;
 
-      let notesBlock = `<td style='font-size: 0.8em;' class="spoolnotes">${renderShortDescription(s.notes)} <button class='sb-button' data-item="spoolnote|${s.id}" style="margin-left: 8px;">Edit</button></td>`;
+      let notesBlock = `<td class="spoolnotes">${renderShortDescription(s.notes)} <button class='sb-button spooleditnotes' data-item="spoolnote|${s.id}">Edit</button></td>`;
 
       if (s.isRetired) {
         html += `<td style='text-align: right;' class='left'>&mdash;</td><td style='text-align: right;'>&mdash;</td><td style='text-align: right;'>&mdash;</td>${notesBlock}<td></td>`;
@@ -54,8 +54,8 @@ export async function renderSpools(excludeRetired: boolean | true): Promise<stri
       else {
         html += `
         <td style='text-align: right;' class="left">${s.remainingWeight}</td>
-        <td style='text-align: right;' class="net"><button class="sb-button" data-item="spoolremaining|${s.id}" title="Modify the initial weight" style="font-size: 0.72em; margin-right: 8px;">Edit</button> ${s.initialNetWeight}</td>
-        <td style='text-align: right;' class="gross"><button class="sb-button" data-item="spoolgross|${s.id}" title="Modify the gross weight" style="font-size: 0.72em; margin-right: 8px;">Edit</button> ${s.grossWeight}</td>
+        <td style='text-align: right;' class="net"><button class="sb-button spooleditleft" data-item="spoolremaining|${s.id}" title="Modify the initial weight">Edit</button> ${s.initialNetWeight}</td>
+        <td style='text-align: right;' class="gross"><button class="sb-button spooleditgross" data-item="spoolgross|${s.id}" title="Modify the gross weight">Edit</button> ${s.grossWeight}</td>
         ${notesBlock}`;
         html += `<td><button class='sb-button-primary spoolretire' data-item='retire|${s.id}'>Retire</button></td>`;
       }
@@ -135,12 +135,12 @@ export async function renderPrintJobs(excludeRetired: boolean | true, limit: num
     if (!limitReached) {
       html += `<tr>
         <td style='text-align: right;' class="jobdate">${new Date(j.date).toLocaleDateString()}</td>
-        <td style='font-size: 0.8em;' class="jobdesc">${renderShortDescription(j.description)}</td>
+        <td class="jobdesc">${renderShortDescription(j.description)}</td>
         <td class='jobspool ${j.spoolIsRetired ? "retired" : ""}'>${j.spoolBrand} | ${j.spoolMaterial}</td>
-        <td style="font-size: 0.8em;">${renderColor(j.spoolColor, j.spoolIsTranslucent)}</td>
+        <td>${renderColor(j.spoolColor, j.spoolIsTranslucent)}</td>
         <td style='text-align: right; class="jobweight"'>${j.filamentWeight}</td>
         <td style='text-align: right; class="jobduration"'>${prettifyDuration(j.duration)}</td>
-        <td style='font-size: 0.8em;' class="jobnotes">${renderShortDescription(j.notes)}</td>`;
+        <td class="jobnotes">${renderShortDescription(j.notes)}</td>`;
 
       if (j.spoolIsRetired && excludeRetired) {
         html += "<td></td>";

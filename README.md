@@ -96,11 +96,28 @@ config.set {
 
 ### Custom Space Style
 
-Due to the tabular nature of the document list, it is suggested to widen the editor area with some Space Style, which will only have effect on Desktop browsers.
+Due to the tabular nature of the document list, it is suggested to widen the editor area with some Space Style, which will only have effect on Desktop browsers. Also, you can add some styles to make the content look better.
 
 ```css
 html {
   --editor-width: 1200px;
+}
+
+td.retired {
+  text-decoration: line-through;
+  opacity: 0.5;
+}
+td.left {
+  font-weight: 600;
+}
+td.jobdesc, td.jobnotes, td.spoolnotes {
+  font-size: 0.8em;
+}
+.spooluse, .spooleditleft, .spooleditgross {
+  font-size: 0.8em;
+}
+.spooleditnotes {
+  font-size: 1.0em;
 }
 ```
 
