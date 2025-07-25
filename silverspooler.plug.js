@@ -45,7 +45,7 @@ var ee=Object.defineProperty;var D=(e,t)=>{for(var r in t)ee(e,r,{get:t[r],enume
   <tbody>`,u="";for(let s of n)(!s.isRetired||s.isRetired&&!e)&&(u+=`<option value='${s.id}'>${s.brand} | ${s.material} | ${_t(s.color,s.isTranslucent)}${s.isRetired?" (Retired)":""}</value>`);i+=`<tr class='newprintjob'>
     <td><input type='date' required id='printjobdate' style='width: 100%;' value="${typeof f<"u"?f?.date:tr()}" /></td>
     <td><input type='text' required id='printjobdesc' placeholder='Description' style='width: 100%;' value="${typeof f<"u"?f?.description:""}" /></td>
-    <td colspan='2'><select id='printjobfilament' value="${typeof f<"u"?f?.spoolId:""}">${u}</select></td>
+    <td colspan='2'><select id='printjobfilament' value="${typeof f<"u"?f?.spoolId:"---"}">${u}</select></td>
     <td style='text-align: right;'><input type='number' required id='printjobweight' style='width: 60%; text-align: right;' value="${typeof f<"u"?f?.filamentWeight:""}" /></td>
     <td style='text-align: right;'><input type='number' required id='printjobduration' style='width: 60%; text-align: right;' value="${typeof f<"u"?f?.duration:""}" title="Please enter a duration in minutes." /></td>
     <td><input type='text' id='printjobnotes' style='width: 100%;' value="${typeof f<"u"?f?.notes:""}" /></td>
