@@ -45,11 +45,11 @@ export async function renderSpools(excludeRetired: boolean | undefined, displayU
   spools.forEach((s) => {
     if (!excludeRetired || (excludeRetired && !s.isRetired)) {
       html += `<tr class='${s.isRetired ? "retired" : "active"}'>
-      <td class="spoolbrand">${s.brand}</td>
-      <td class="spoolmaterial">${s.material}${!s.isRetired && displayUseButton ? ` <button class="sb-button spooluse" onclick="javascript:document.getElementById('printjobfilament').value='${s.id}'; return false;" title="Select this filament for a new print job.">Use</button>` : ""}</td>
+      <td class="spoolbrand">${!s.isRetired && displayUseButton ? `<button class="sb-button spooluse" onclick="javascript:document.getElementById('printjobfilament').value='${s.id}'; return false;" title="Select this filament for a new print job.">Use</button> ` : ""}${s.brand}</td>
+      <td class="spoolmaterial">${s.material}</td>
       <td class="spoolcolor">${renderColor(s.color, s.isTranslucent)}</td>`;
 
-      let notesBlock = `<td class="spoolnotes">${renderShortDescription(s.notes)} <button class='sb-button spooleditnotes' data-item="spoolnote|${s.id}">Edit</button></td>`;
+      let notesBlock = `<td class="spoolnotes">${renderShortDescription(s.notes)} <button class='sb-button spooleditnotes' data-item="spoolnote|${s.id}" title="Modify the notes for this spool.">Edit</button></td>`;
 
       if (s.isRetired) {
         html += `<td style='text-align: right;' class='left'>&mdash;</td><td style='text-align: right;'>&mdash;</td><td style='text-align: right;'>&mdash;</td>${notesBlock}<td></td>`;
@@ -60,7 +60,7 @@ export async function renderSpools(excludeRetired: boolean | undefined, displayU
         <td style='text-align: right;' class="net"><button class="sb-button spooleditleft" data-item="spoolremaining|${s.id}" title="Modify the initial weight">Edit</button> ${s.initialNetWeight}</td>
         <td style='text-align: right;' class="gross"><button class="sb-button spooleditgross" data-item="spoolgross|${s.id}" title="Modify the gross weight">Edit</button> ${s.grossWeight}</td>
         ${notesBlock}`;
-        html += `<td><button class='sb-button-primary spoolretire' data-item='retire|${s.id}'>Retire</button></td>`;
+        html += `<td><button class='sb-button-primary spoolretire' data-item='retire|${s.id}' title="Retire this spool.">Retire</button></td>`;
       }
 
       html += "</tr>";
@@ -237,7 +237,7 @@ async function refreshInternal(message: string) {
 }
 
 async function retireSpool(spoolId: string) {
-  let confirmed = await editor.confirm("Are you sure you want to retire that spool?");
+  let confirmed = await editor.confirm("Are you sure you want to retire that spool? This action cannot be undone.");
   if (confirmed) {
     let spools = await getSpools();
     for (const s of spools) {
