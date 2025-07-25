@@ -114,7 +114,7 @@ export async function renderPrintJobs(excludeRetired: boolean | true, limit: num
   }
 
   html += `<tr class='newprintjob'>
-    <td><input type='date' required id='printjobdate' style='width: 100%;' value="${typeof _justDeletedPrintJob !== "undefined" ? _justDeletedPrintJob?.date : ""}" /></td>
+    <td><input type='date' required id='printjobdate' style='width: 100%;' value="${typeof _justDeletedPrintJob !== "undefined" ? _justDeletedPrintJob?.date : getTodayDate()}" /></td>
     <td><input type='text' required id='printjobdesc' placeholder='Description' style='width: 100%;' value="${typeof _justDeletedPrintJob !== "undefined" ? _justDeletedPrintJob?.description : ""}" /></td>
     <td colspan='2'><select id='printjobfilament' value="${typeof _justDeletedPrintJob !== "undefined" ? _justDeletedPrintJob?.spoolId : ""}">${filamentOptions}</select></td>
     <td style='text-align: right;'><input type='number' required id='printjobweight' style='width: 60%; text-align: right;' value="${typeof _justDeletedPrintJob !== "undefined" ? _justDeletedPrintJob?.filamentWeight : ""}" /></td>
@@ -660,6 +660,16 @@ async function savePrintJobs(printJobs: Array<LivePrintJob>) {
 
   // Need to force a cleanup to re-calculate spool remaining filament
   _spools = null;
+}
+
+function getTodayDate(): string {
+  const today = new Date();
+  const yyyy = today.getFullYear();
+  const mm = String(today.getMonth() + 1).padStart(2, '0'); // Months are 0-based
+  const dd = String(today.getDate()).padStart(2, '0');
+
+  const formattedDate = `${yyyy}-${mm}-${dd}`;
+  return formattedDate;
 }
 
 function prettifyDuration(duration: number): string {
