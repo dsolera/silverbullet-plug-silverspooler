@@ -351,7 +351,7 @@ async function deletePrintJob(printJobId: string) {
 
   if (newPrintJobs.length < printJobs.length) {
     await savePrintJobs(newPrintJobs);
-    await refreshInternal("Print job deleted.");
+    await refreshInternal("Print job deleted. You can re-add it if you want.");
   }
 }
 
