@@ -106,7 +106,7 @@ export async function renderPrintJobs(excludeRetired: boolean | true, limit: num
   </thead>
   <tbody>`;
 
-  let filamentOptions: string = "";
+  let filamentOptions: string = "<option value='.'>-- Select --</option>";
   for (const s of spools) {
     if (!s.isRetired || (s.isRetired && !excludeRetired)) {
       filamentOptions += `<option value='${s.id}' ${(typeof _justDeletedPrintJob !== "undefined" && _justDeletedPrintJob?.spoolId === s.id) ? "selected='true'" : ""}>${s.brand} | ${s.material} | ${renderColorSimple(s.color, s.isTranslucent)}${s.isRetired ? " (Retired)" : ""}</option>`;

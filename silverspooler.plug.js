@@ -42,7 +42,7 @@ var ee=Object.defineProperty;var D=(e,t)=>{for(var o in t)ee(e,o,{get:t[o],enume
       <td></td>
     </tr>
   </thead>
-  <tbody>`,u="";for(let s of n)(!s.isRetired||s.isRetired&&!e)&&(u+=`<option value='${s.id}' ${typeof f<"u"&&f?.spoolId===s.id?"selected='true'":""}>${s.brand} | ${s.material} | ${_t(s.color,s.isTranslucent)}${s.isRetired?" (Retired)":""}</option>`);i+=`<tr class='newprintjob'>
+  <tbody>`,u="<option value='.'>-- Select --</option>";for(let s of n)(!s.isRetired||s.isRetired&&!e)&&(u+=`<option value='${s.id}' ${typeof f<"u"&&f?.spoolId===s.id?"selected='true'":""}>${s.brand} | ${s.material} | ${_t(s.color,s.isTranslucent)}${s.isRetired?" (Retired)":""}</option>`);i+=`<tr class='newprintjob'>
     <td><input type='date' required id='printjobdate' style='width: 100%;' value="${typeof f<"u"?f?.date:to()}" /></td>
     <td><input type='text' required id='printjobdesc' placeholder='Description' style='width: 100%;' value="${typeof f<"u"?f?.description:""}" /></td>
     <td colspan='2'><select id='printjobfilament'>${u}</select></td>
