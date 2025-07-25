@@ -43,7 +43,7 @@ export async function renderSpools(excludeRetired: boolean | true): Promise<stri
     if (!excludeRetired || (excludeRetired && !s.isRetired)) {
       html += `<tr class='${s.isRetired ? "retired" : "active"}'>
       <td class="spoolbrand">${s.brand}</td>
-      <td class="spoolmaterial">${s.material}</td>
+      <td class="spoolmaterial">${s.material}${!s.isRetired ? ` <button class="sb-button" style="font-size: 0.72em;" onclick="javascript:document.getElementById('printjobfilament').value='${s.id}'; return false;" title="Select this filament for a new print job.">Use</button>` : ""}</td>
       <td class="spoolcolor">${renderColor(s.color, s.isTranslucent)}</td>`;
 
       let notesBlock = `<td style='font-size: 0.8em;' class="spoolnotes">${renderShortDescription(s.notes)} <button class='sb-button' data-item="spoolnote|${s.id}" style="margin-left: 8px;">Edit</button></td>`;
