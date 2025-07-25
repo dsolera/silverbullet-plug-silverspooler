@@ -16,6 +16,8 @@ This plug does not record printer information and does not allow to group filame
 
 All data is saved in JSON files that are easily portable and human-readable.
 
+<img width="1791" height="2325" alt="screenshot" src="https://github.com/user-attachments/assets/2c20087e-3eb2-4055-be61-800128c16e37" />
+
 ## Configuration
 
 By default, this plug stores data in the current space under the `Files/SilverSpooler/` folder.
