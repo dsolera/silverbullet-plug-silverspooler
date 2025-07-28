@@ -119,6 +119,9 @@ td.left {
 td.jobdesc, td.jobnotes, td.spoolnotes {
   font-size: 0.8em;
 }
+td.jobdate {
+  text-align: right;
+}
 .spooluse, .spooleditleft, .spooleditgross {
   font-size: 0.8em;
 }

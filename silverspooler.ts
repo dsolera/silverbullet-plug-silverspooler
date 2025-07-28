@@ -98,7 +98,7 @@ export async function renderPrintJobs(excludeRetired: boolean | true, limit: num
   <table>
   <thead>
     <tr>
-      <td style='text-align: right;'>Date</td>
+      <td class="jobdate">Date</td>
       <td>Description</td>
       <td colspan='2'>Spool</td>
       <td style='text-align: right;'>Weight</td>
@@ -117,7 +117,7 @@ export async function renderPrintJobs(excludeRetired: boolean | true, limit: num
   }
 
   html += `<tr class='newprintjob'>
-    <td><input type='date' required id='printjobdate' style='width: 100%;' value="${typeof _justDeletedPrintJob !== "undefined" ? _justDeletedPrintJob?.date : getTodayDate()}" /></td>
+    <td class="jobdate"><input type='date' required id='printjobdate' style='width: 100%;' value="${typeof _justDeletedPrintJob !== "undefined" ? _justDeletedPrintJob?.date : getTodayDate()}" /></td>
     <td><input type='text' required id='printjobdesc' placeholder='Description' style='width: 100%;' value="${typeof _justDeletedPrintJob !== "undefined" ? _justDeletedPrintJob?.description : ""}" /></td>
     <td colspan='2'><select id='printjobfilament'>${filamentOptions}</select></td>
     <td style='text-align: right;'><input type='number' required id='printjobweight' style='width: 60%; text-align: right;' value="${typeof _justDeletedPrintJob !== "undefined" ? _justDeletedPrintJob?.filamentWeight : ""}" /></td>
@@ -137,7 +137,7 @@ export async function renderPrintJobs(excludeRetired: boolean | true, limit: num
   for (const j of jobs) {
     if (!limitReached) {
       html += `<tr>
-        <td style='text-align: right;' class="jobdate">${new Date(j.date).toLocaleDateString()}</td>
+        <td class="jobdate">${new Date(j.date).toLocaleDateString()}</td>
         <td class="jobdesc">${renderShortDescription(j.description)}</td>
         <td class='jobspool ${j.spoolIsRetired ? "retired" : ""}'>${j.spoolBrand} | ${j.spoolMaterial}</td>
         <td>${renderColor(j.spoolColor, j.spoolIsTranslucent)}</td>
