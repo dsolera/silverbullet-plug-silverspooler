@@ -415,10 +415,10 @@ async function saveNewPrintJob(args: string) {
     return;
   }
 
-  let confirmed = await editor.confirm("Are you sure you want to add that new print job?");
+  /*let confirmed = await editor.confirm("Are you sure you want to add that new print job?");
   if (!confirmed) {
     return;
-  }
+  }*/
 
   let newPrintJob: LivePrintJob = {
     id: newUUID(),
