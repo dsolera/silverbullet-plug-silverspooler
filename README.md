@@ -79,6 +79,14 @@ You can also specify the maximum number of print jobs to show, for example to 15
 ... system.invokeFunction("silverspooler.renderPrintJobs", true, 15) ...
 ```
 
+### Print Stats
+
+To display a table with some statistics about print jobs and materials, use the following Lua expression:
+
+```lua
+${ widget.new { html = system.invokeFunction("silverspooler.renderPrintStats"), display = "block" } }
+```
+
 ### Data Refresh
 
 If you modify the files outside SilverBullet, after letting SB sync the new files you can invoke the `SilverSearch: Refresh` command to reload all the data. You can also create a button using a Lua Expression.

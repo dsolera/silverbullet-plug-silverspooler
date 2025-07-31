@@ -29,8 +29,8 @@ export async function renderSpools(excludeRetired: boolean | undefined, displayU
     <td><input type='text' required id='spoolbrand' placeholder='Brand' style='width: 100%;' /></td>
     <td><input type='text' required id='spoolmaterial' placeholder='Material' style='width: 100%;' /></td>
     <td colspan='2'><input type='color' required id='spoolcolor' style='width: 50px;' />&nbsp;<input type='checkbox' id='spooltranslucent' /> <label for='spooltranslucent' title='Translucent or transparent filament'>TL</label></td>
-    <td style='text-align: right;'><input type='number' required id='spoolnetweight' style='width: 60%; text-align: right;' value='1000' /></td>
-    <td style='text-align: right;'><input type='number' required id='spoolgrossweight' style='width: 60%; text-align: right;' /></td>
+    <td style='text-align: right;'><input type='number' required id='spoolnetweight' style='width: 60%; text-align: right;' value='1000' title='Usually grams' /></td>
+    <td style='text-align: right;'><input type='number' required id='spoolgrossweight' style='width: 60%; text-align: right; title='Usually grams' /></td>
     <td><input type='text' id='spoolnotes' style='width: 100%;' /></td>
     <td>
       <button class="sb-button-primary spooladd" data-item="newspool" onclick='javascript:document.getElementById("newspooldata").value ="br="+encodeURIComponent(document.getElementById("spoolbrand").value)+"&mt="+encodeURIComponent(document.getElementById("spoolmaterial").value)+"&cl="+encodeURIComponent(document.getElementById("spoolcolor").value)+"&tl="+encodeURIComponent(document.getElementById("spooltranslucent").checked)+"&nw="+encodeURIComponent(document.getElementById("spoolnetweight").value)+"&gw="+encodeURIComponent(document.getElementById("spoolgrossweight").value)+"&nt="+encodeURIComponent(document.getElementById("spoolnotes").value);'>Add</button>
@@ -169,6 +169,63 @@ export async function renderPrintJobs(excludeRetired: boolean | true, limit: num
   html += `<tr><td colspan='4'>${totalJobs} Print Jobs${limitReached ? " (" + (totalJobs - limit) + " not shown)" : ""}</td><td style='text-align: right;'>${totalWeight}</td><td style='text-align: right;'>${prettifyDuration(totalDuration)}</td><td></td><td></td></tr>`;
 
   html += "</tfoot></table></div>";
+
+  return html;
+}
+
+export async function renderPrintStats() {
+  let jobs = await getPrintJobs();
+
+  let stats = {}
+
+  for (const j of jobs) {
+    if (typeof stats[j.spoolMaterial] === "undefined") {
+      stats[j.spoolMaterial] = {
+        weight: 0,
+        time: 0,
+        weightPerHour: 0
+      }
+    }
+
+    stats[j.spoolMaterial].weight += j.filamentWeight;
+    stats[j.spoolMaterial].time += j.duration;
+    stats[j.spoolMaterial].weightPerHour = (stats[j.spoolMaterial].weight / stats[j.spoolMaterial].time) * 60;
+  }
+
+  // Sort by time desc
+  let sortableArray = Object.entries(stats);
+  let sortedArray = sortableArray.sort(([, a], [, b]) => b.weightPerHour - a.weightPerHour);
+  stats = Object.fromEntries(sortedArray);
+
+  let html = `<div class='silverspooler printstats'>
+  <table><thead><tr>
+    <td>Material</td>
+    <td style='text-align: right;'>Printed Weight</td>
+    <td style='text-align: right;'>Print Time</td>
+    <td style='text-align: right;'>Avg. Weight/h</td>
+  </tr></thead><tbody>`;
+
+  let overallWeight = 0;
+  let overallTime = 0;
+
+  for (const k of Object.keys(stats)) {
+    html += `<tr>
+      <td>${k}</td>
+      <td style='text-align: right;'>${stats[k].weight}</td>
+      <td style='text-align: right;'>${prettifyDuration(stats[k].time)}</td>
+      <td style='text-align: right;'>${Math.round((stats[k].weightPerHour + Number.EPSILON) * 100) / 100}</td>
+    </tr>`;
+
+    overallWeight += stats[k].weight;
+    overallTime += stats[k].time;
+  }
+
+  html += `<tfoot><tr>
+      <td colspan='3'>Overall Avg. Weight/h</td>
+      <td style='text-align: right;'>${Math.round((((overallWeight / overallTime) * 60) + Number.EPSILON) * 100) / 100}</td>
+    </tr></tfoot>`;
+
+  html += "</tbody></table></div>";
 
   return html;
 }
