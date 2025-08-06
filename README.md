@@ -45,7 +45,7 @@ Include this Lua Expression:
 ${ widget.new { html = silverspooler.renderSpools(), events = { click = function(e) silverspooler.click(e.data.target.getAttribute("data-item"), js.window.document.getElementById("newspooldata").value) end }, display = "block" } }
 ```
 
-In the `invokeFunction` call, you can optionally specify a `boolean` to hide retired (fully used) spools: `true` to hide retired spools, `false` (default) to include them.
+You can optionally specify a `boolean` to hide retired (fully used) spools: `true` to hide retired spools, `false` (default) to include them.
 
 ```lua
 ... silverspooler.renderSpools(true) ...
@@ -62,10 +62,10 @@ You can also specify a second parameter to decide if you want to include a "Use"
 Include this Lua Expression:
 
 ```lua
-${ widget.new { html = silverspooler.renderPrintJobs(true), events = { click = function(e) silverspooler.click(e.data.target.getAttribute("data-item"), js.window.document.getElementById("newprintjobdata").value) end }, display = "block" } }
+${ widget.new { html = silverspooler.renderPrintJobs(), events = { click = function(e) silverspooler.click(e.data.target.getAttribute("data-item"), js.window.document.getElementById("newprintjobdata").value) end }, display = "block" } }
 ```
 
-In the `invokeFunction` call, you can optionally specify a `boolean` to hide retired (fully used) spools so that they are no longer selectable for new print jobs: `true` to hide retired spools, `false` (default) to include them.
+You can optionally specify a `boolean` to hide retired (fully used) spools so that they are no longer selectable for new print jobs: `true` to hide retired spools, `false` (default) to include them.
 
 ```lua
 ... silverspooler.renderPrintJobs(true) ...
