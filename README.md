@@ -42,19 +42,19 @@ Include a Lua Expression in any note to render the Plug's features.
 Include this Lua Expression:
 
 ```lua
-${ widget.new { html = system.invokeFunction("silverspooler.renderSpools"), events = { click = function(e) system.invokeFunction("silverspooler.click", e.data.target.getAttribute("data-item"), js.window.document.getElementById("newspooldata").value) end }, display = "block" } }
+${ widget.new { html = silverspooler.renderSpools(), events = { click = function(e) silverspooler.click(e.data.target.getAttribute("data-item"), js.window.document.getElementById("newspooldata").value) end }, display = "block" } }
 ```
 
 In the `invokeFunction` call, you can optionally specify a `boolean` to hide retired (fully used) spools: `true` to hide retired spools, `false` (default) to include them.
 
 ```lua
-... system.invokeFunction("silverspooler.renderSpools", true) ...
+... silverspooler.renderSpools(true) ...
 ```
 
 You can also specify a second parameter to decide if you want to include a "Use" button near each filament, to select their record in the "New Print Job" form, if present on the same page: `true` (default) to display the butto, `false` to hide them (for example, if you keep the two lists on separate pages).
 
 ```lua
-... system.invokeFunction("silverspooler.renderSpools", true, true) ...
+... silverspooler.renderSpools(true, true) ...
 ```
 
 ### Print Jobs Management
@@ -62,13 +62,13 @@ You can also specify a second parameter to decide if you want to include a "Use"
 Include this Lua Expression:
 
 ```lua
-${ widget.new { html = system.invokeFunction("silverspooler.renderPrintJobs", true), events = { click = function(e) system.invokeFunction("silverspooler.click", e.data.target.getAttribute("data-item"), js.window.document.getElementById("newprintjobdata").value) end }, display = "block" } }
+${ widget.new { html = silverspooler.renderPrintJobs(true), events = { click = function(e) silverspooler.click(e.data.target.getAttribute("data-item"), js.window.document.getElementById("newprintjobdata").value) end }, display = "block" } }
 ```
 
 In the `invokeFunction` call, you can optionally specify a `boolean` to hide retired (fully used) spools so that they are no longer selectable for new print jobs: `true` to hide retired spools, `false` (default) to include them.
 
 ```lua
-... system.invokeFunction("silverspooler.renderPrintJobs", true) ...
+... silverspooler.renderPrintJobs(true) ...
 ```
 
 Please note that hiding retired spools forbids the deletion of the print jobs that have used them.
@@ -76,7 +76,7 @@ Please note that hiding retired spools forbids the deletion of the print jobs th
 You can also specify the maximum number of print jobs to show, for example to 15. Please note that hidden jobs will still count towards the overall statistics.
 
 ```lua
-... system.invokeFunction("silverspooler.renderPrintJobs", true, 15) ...
+... silverspooler.renderPrintJobs(true, 15) ...
 ```
 
 ### Print Stats
@@ -84,7 +84,7 @@ You can also specify the maximum number of print jobs to show, for example to 15
 To display a table with some statistics about print jobs and materials, use the following Lua expression:
 
 ```lua
-${ widget.new { html = system.invokeFunction("silverspooler.renderPrintStats"), display = "block" } }
+${ widget.new { html = silverspooler.renderPrintStats(), display = "block" } }
 ```
 
 ### Data Refresh
@@ -92,7 +92,7 @@ ${ widget.new { html = system.invokeFunction("silverspooler.renderPrintStats"), 
 If you modify the files outside SilverBullet, after letting SB sync the new files you can invoke the `SilverSearch: Refresh` command to reload all the data. You can also create a button using a Lua Expression.
 
 ```lua
-${ widgets.button("Refresh Data", function() editor.invokeCommand("Sync: Now") editor.invokeCommand("SilverSpooler: Refresh") end) }
+${ widgets.button("Refresh Data", function() editor.invokeCommand("Sync: Now") silverspooler.refresh() end) }
 ```
 
 ## Installation

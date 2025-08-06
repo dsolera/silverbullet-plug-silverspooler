@@ -2,13 +2,18 @@ name: silverspooler
 functions:
   renderSpools:
     path: silverspooler.ts:renderSpools
+    syscall: silverspooler.renderSpools
   renderPrintJobs:
     path: silverspooler.ts:renderPrintJobs
+    syscall: silverspooler.renderPrintJobs
   renderPrintStats:
     path: silverspooler.ts:renderPrintStats
+    syscall: silverspooler.renderPrintStats
   click:
     path: silverspooler.ts:click
+    syscall: silverspooler.click
   refresh:
     path: silverspooler.ts:refresh
+    syscall: silverspooler.refresh
     command:
       name: "SilverSpooler: Refresh"
