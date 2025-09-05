@@ -595,8 +595,9 @@ async function getSpools(): Promise<Array<LiveSpool>> {
     }
 
     if (hasContent(spoolsData)) {
-      _spools = await JSON.parse(spoolsData).spools as Array<LiveSpool>;
-      await loadRemainingWeight(_spools);
+      let newSpools = await JSON.parse(spoolsData).spools as Array<LiveSpool>;
+      await loadRemainingWeight(newSpools);
+      _spools = newSpools;
     }
     else {
       _spools = new Array<LiveSpool>();
