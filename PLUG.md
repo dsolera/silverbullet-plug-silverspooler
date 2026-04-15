@@ -89,10 +89,10 @@ ${ widget.new { html = silverspooler.renderPrintStats(), display = "block" } }
 
 ### Data Refresh
 
-If you modify the files outside SilverBullet, after letting SB sync the new files you can invoke the `SilverSearch: Refresh` command to reload all the data. You can also create a button using a Lua Expression.
+If you modify the files outside SilverBullet, after letting SB sync the new files you can invoke the `SilverSpooler: Refresh` command to reload all the data. You can also create a button using a Lua Expression.
 
 ```lua
-${ widgets.button("Refresh Data", function() editor.invokeCommand("Sync: Now") silverspooler.refresh() end) }
+${ widgets.button("Refresh Data", function() editor.invokeCommand("Sync: Space") silverspooler.refresh() end) }
 ```
 
 ## Installation
